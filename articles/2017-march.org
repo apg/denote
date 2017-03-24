@@ -1,0 +1,10 @@
+#+TITLE: March 2017 Articles
+
+* TODO [[https://docs.google.com/document/d/199PqyG3UsyXlwieHaqbGiWVa8eMWi8zzAn0YfcApr8Q/edit#!][My Philosophy on Alerting]]
+Rob Ewaschuk
+
+(I've read this before. Refresh with notes)
+
+* TODO [[http://peter.bourgon.org/blog/2017/02/21/metrics-tracing-and-logging.html][Metrics Tracing and Logging]]
+Peter Bourgon
+
