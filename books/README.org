@@ -1,0 +1,6 @@
+#+TITLE: Books
+
+* TODO [[https://en.wikipedia.org/wiki/The_Black_Swan_(Taleb_book)][The Black Swan]]                                           :probability:
+* TODO [[http://book.mixu.net/distsys/][Distributed systems for fun and profit]]                       :distsys:
+  - I've read this before, but re-read.
+* TODO [[https://en.wikipedia.org/wiki/Exit,_Voice,_and_Loyalty][Exit, Voice, and Loyalty]]
