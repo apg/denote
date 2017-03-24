@@ -1,0 +1,286 @@
+#+TITLE: SREcon Americas 2017
+#+FILETAGS: :sre:conference:
+
+SREcon Americas 2017 took place in San Francisco on March 13,
+14 2017. I attended both days thanks to my employeer, Heroku.
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/majors][Keep Calm and Carry On: Scaling Your Org with Microservices]] :operations:comms:observability:
+Charity Majors, Honeycomb, and Bridget Kromhout, Pivotal
+
+Ask people about their experience rolling out microservices, and one
+theme dominates: engineering is the easy part, people are super hard!
+Everybody knows about Conway's Law, everybody knows they need to make
+changes to their organization to support a different product model,
+but what are those changes? How do you know if you're succeeding or
+failing, if people are struggling and miserable or just experiencing
+the discomfort of learning new skills? We'll talk through real stories
+of pain and grief as people modernize their team and their stack.
+
+** INTERFACES
+*** Your team is a service and members are nodes
+*** Management's MISSION
+    - Routing, Load Balancing, Health Checking
+*** Chaos Monkey your teams!
+
+** COMMUNICATIONS
+*** Implicit channels matter just as much -- SAY THANKS once in a while.
+*** You can't debug something you can't name, understand, describe.
+
+** OPERATIONS
+*** You need ops skills to be an SWE
+*** Ops should be consultants
+*** Snowflakes are enormously costly!
+*** Ask Ops Questions *during* interviews
+
+** DATA
+*** Consider it just another service
+*** Make it as stateless as possible
+
+** OBSERVABILITY
+*** You have a responsibility to your team's well-being whether you're a manager or not.
+
+** TL;DR
+*** Innovate only where you need to/where you'll gain
+*** Empower yourself; don't wait. Actively decentralize power and you'll decentralize points of failure.
+*** Ask for permission strategically; move your org towards assume-yes
+*** Communication (implicit and explicit) is key to decentralizing & microservices
+*** Look for uncomfortable places. Be happy when you find them; That's where you and the org can grow.
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/carr][How Do Your Packets Flow?]]                              :networking:peering:
+Leslie Carr, Clover Health
+
+As more of us move to the "cloud" we lose sight of how packets flow
+from our application to the end user. This is an introduction to how
+your network traffic flows.
+
+I come from a network engineering background. Talking with many
+SRE/Devops folks, I've realized that many don't actually understand
+how network traffic flows. This will be a 20 minute introduction to
+network traffic - concepts like peering and transit will be
+introduced, as well as DWDM and awesome cable maps. This will also
+introduce some of the monetary concepts in traffic - so that people
+have a better understanding of large fights between providers - like
+the Netflix/Comcast fight of a few years back.
+
+** Cladding: Optical reflective cabling to reduce proton loss
+** Wavelength Division Multi-Plexing
+*** Prism based networking.
+*** Each wavelength like a laser. 
+*** Something like 200Gb data.
+** Put lots of those cables together
+** "Lots of shotgun related outages" -- when cables are run above ground in communities with hunting.
+** SFMIX - A Peering provider. 
+*** Peering basically offering direct connections to networks to avoid extra switching costs of going over the internet.
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/root][Spotify's Love Hate Relationship with DNS]]                     :dns:spotify:
+Lynn Root
+
+Spotify has a history of loving "boring" technologies, with DNS being
+one of them. DNS deployments use to be manual and hand-edited in a
+subversion repo. To make sure there were no surprises, you had to yell
+"DNS DEPLOY" in the #sre channel on IRC before pushing the button. Now
+with proper automation and far fewer hands editing records, we've seen
+just how far we can push DNS. With DNS, we got a stable query
+interface, free caching, and service discovery. And just how often it
+_is_ the root of a problem. This talk will walk through Spotify's
+"coming of age" story, of how we pushed DNS to its limits, and all the
+weird intricacies we discovered along the way.
+
+** Why love DNS?
+*** Stable query language
+*** Caching
+*** Service Discovery
+** Nameless DNS based service discovery
+** Monitoring lots of metrics for health
+** NS1 has good Geo DNS support, better than Route53, so they used that.
+** DNS based error reporting (??? -- don't remmeber why this was interesting)
+** DHT ring for song lookup.
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/wilkinson][Practical Guide to Alerting and Monitoring with Time Series Data at Scale]] :monitoring:timeseries:alerting:
+Jamie Wilkinson, Google
+
+Monitoring is the foundational bedrock of site reliability yet is the
+bane of most sysadmins’ lives. Why? Monitoring sucks when the cost of
+maintenance scales proportionally with the size of the system being
+monitored. Recently, tools like Riemann and Prometheus have emerged to
+address this problem by scaling out monitoring configurations
+sublinearly with the size of the system.
+
+In a talk complementing the Google SRE book chapter “Practical
+Alerting from Time Series Data,” Jamie Wilkinson explores the theory
+of alert design and time series-based alerting methods and offers
+practical examples in Prometheus that you can deploy in your
+environment today to reduce the amount of alert spam and help
+operators keep a healthy level of production hygiene.
+
+** Dickerson's Hierarchy of Needs
+#+begin_src
+                 Product
+              Feature Developement
+          Testing
+       Route Cause Analysis / Post Mortem
+    Incident Response
+  Monitoring
+#+end_src
+** Cost of maintenance in Ops Sucks
+** Monitoring
+*** Failure Detection
+*** Performance Analysis
+*** Capacity Planning
+*** Incident Response
+** Disk Usage alert
+*** How long do I have to respond?
+*** How much of that before I page?
+** Alert on Rate of Change
+** Quantized
+*** Rate of change per bucket
+** Alert Design
+*** SLI = Service Level Indicator
+*** SLO = Service Level Objective
+*** SLA = Service Level Agreement
+** TODO SLIDES: Jeff Dean: [[https://static.googleusercontent.com/media/research.google.com/en//people/jeff/Berkeley-Latency-Mar2012.pdf][Achieving Rapid Response Times in Large Online Services]]
+** Rob Ewashuk: [[../articles/march-2017.org][My Philosophy on Alerting]]
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/reilly][Traps and Cookies]]                                              :advice:dev:
+Tanya Reilly, Google
+
+Does your production environment expect perfect humans? Does technical
+debt turn your small changes into minefields? This talk highlights
+tools, code, configuration, and documentation that set us up for
+disaster. It discusses commons traps that we can disarm and remove,
+instead of spending precious brain cycles avoiding them. And it offers
+practical advice for sending your future self (and future coworkers!)
+little gifts, instead of post-mortems that just say “human
+error :-(”. Includes stories of preventable outages. Bring your
+schadenfreude.
+
+** "Thank you for finding this"
+** Leave cookies for your future self. 
+*** Can use comments: "You'll want to do *that*, but don't! It'll break this and this and this badly."
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/kromhout][Observability in the era of Cambrian Stack Era]]
+Charity Majors, Honeycomb
+
+Distributed systems, microservices, automation and orchestration,
+multiple persistence layers, containers and schedulers... today's
+infrastructure is a Cambrian explosion of novelty and complexity. How
+is a humble engineer to make sense of it all? That's where
+observability comes in: engineering your systems to be understandable,
+explorable, and self-explanatory. Let's talk about what modern tooling
+is for complex systems and how to bootstrap a culture of
+observability.
+
+** Number of choices is paralyzing
+** Monitoring is a *solved* problem
+** Debugging is *not* a solved problem
+** *OBSERVE* Everything
+** Do *less* monitoring
+** Do *more* instrumentation
+** Do build tools to help
+*** "strace for distributed systems"
+** Data driven debugging
+** NOT ANOTHER DASHBOARD
+*** Dashboards for KPIS
+** The future is Explorable
+** The future
+*** Standardized data, flexible data
+*** events
+*** event driven debugging
+** The future *must* cross barriers and boundaries
+** How do we *recall* old debugging things? Output of retros? Heat maps of commands?
+** Debugging *is* a social activity.
+*** Creating is expensive
+*** Sharing is cheap
+** The future is human powered
+** Second wave of devops?
+*** Teach SWEs ops!
+** The future belongs to SWEs, native in tools.
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/kehoe_mttr][Reducing MTTR and False Escalations: Event Correlation at LinkedIn]]   :mttr:
+Michael Kehoe, LinkedIn
+
+LinkedIn’s production stack is made up of over 900 applications and
+over 2200 internal API’s. With any given application having many
+interconnected pieces, it is difficult to escalate to the right person
+in a timely manner.
+
+In order to combat this, LinkedIn built an Event Correlation Engine
+that monitors service health and maps dependencies between services to
+correctly escalate to the SRE’s who own the unhealthy service.
+
+We’ll discuss the approach we used in building a correlation engine
+and how it has been used at LinkedIn to reduce incident impact and
+provide better quality of life to LinkedIn’s oncall engineers.
+
+** Alert Correlation
+*** Strong Signal to noise ratio
+*** Existing Alerts
+** Need a callgraph!
+** Each service has similar metrics
+*** Call counts
+*** Latency
+*** Errors
+** They basically walk the call graph and try to find correlations to errors / latency
+** Produce Alerts with More data
+In addition, don't alert if you're extremely confident that it's not your service
+*** Root Cause
+*** Owner
+*** Links to Analysis
+*** Responsble Services
+
+* [[https://www.usenix.org/conference/srecon17americas/program/presentation/rensin][Reliability When Everything is a Platform: Why you Need to SRE your customers]] :reliability:availability:platform:
+Dave Rensin, Google
+
+The general trend in software over the last several years is to give
+every system an API and turn every product into a platform. When these
+systems only served end users, their reliability depended solely on
+how well we did our jobs as SREs. Increasingly, however, our
+customers' perceptions of our reliability are being driven by the
+quality of the software they bring to our platforms. The normal
+boundaries between our platforms and our customers are being blurred
+and it's getting harder to deliver a consistent end user reliability
+experience.
+
+In this talk we'll discuss a provocative idea—that as SREs we should
+take joint operational responsibility and go on-call for the systems
+our customers build on our platforms. We'll discuss the specific
+technical and operational challenges in this approach and the results
+of an experiment we're running at Google to address this need.
+
+Finally, we'll try to take a glimpse into the future and see what
+these changes mean for the future of SRE as a discipline.
+
+** Disclaimer: For purposes of talk, Availability == Reliability
+** Platform: A system with an API
+*** It's a system with an API... that you might not know you have.
+** Apps consume APIs and have UI
+*** Users interact with them.
+** PRINCIPLE #1: The most important feature is reliability
+** PRINCIPLE #2: Monitoring doesn't define reliability, Users do.
+** PRINCIPLE #3: SLA
+   - Software 99.9%
+   - Operations 99.99%
+   - Business 99.999%
+*** 30-day Error Budget
+    - 99.9% - 42mins downtime
+    - 99.99% - 4.2mins
+    - 99.999% - 26s
+*** Assumption:
+    - 99.99% by luck only with shared operations
+    - Platform customers can get at *most* this.
+** Have to SRE our customers
+*** Stage 1: Application Reliability Reviews
+    - Key Qs:
+    - "What reliability are you getting now? Can you prove it?"
+    - "What are your SLOs and SLIs?" -- need these or will have unreasonable expectations based only on intuition.
+*** Stage 2: Build shared monitoring
+    - Common between teams
+    - No secret data
+*** Stage 3: Practices OPs rigor between teams
+    - Joint post-mortem
+    - Action items in both directions
+*** Stage 4: Joint on-call
+
+** "You can only fight the way you practice."
+   -- Miyamoto Musashi, Book of Five Rings: The Classic Guide to Strategy         
+   
