@@ -1,0 +1,201 @@
+#+Title: Anomaly Detection for Monitoring: A Statistical Approach to Time Series Anomaly Detection
+
+Source: [[http://www.oreilly.com/webops-perf/free/anomaly-detection-monitoring.csp][Anomaly Detection for Monitoring: A Statistical Approach to Time Series Anomaly Detection]]
+Authors: Baron Schwartz & Preetam Jinka
+
+* Introduction
+** Why anomaly detection?
+   - Monitoring is getting harder
+     - We manage more systems and much more data
+     - Etsy has convinced us that we need to monitor everything
+   - Monitoring more signals than ever before
+   - Traditional ways of monitoring no longer suffice
+     - Can't just look at all the data in a dashboard all the time
+     - Thresholds, a crude anomaly detection mechanism are *too* static and 
+       don't adapt to changes over time.
+     - There's no correct threshold value that catches every problem
+   - Nagios' flapping detection is a crude low pass filter, to discard noise
+** Many kinds of anomaly detection
+   - In systems monitoring, we're behind. Anomaly detection is used in fraud
+     prevention, terrorist monitoring, finance, weather, etc
+   - We don't regard it as standard practice, but something on the bleeding edge
+     with a ton of promise
+   - A number of obstacles:
+     - Difficult to get started because there is so much to learn
+     - Even with understanding you can get really poor results
+     - General purpose solutions are next to impossible in many domains.
+     - Unlimited supply of poor or incomplete information (Possibly even in
+       this book!)
+     - Trendy topic. Incentives to pretend you know what you're doing, adding
+       to the horrible noise.
+     - Many methods based on stats / prob. which often aren't intuitive.
+   - "Not knowing how near the truth is, we seek it far away." 
+     -- Zen Master Hakuin
+* A crash course in Anomaly Detection
+** A Real Example
+   - Evan Miller's Paper "[[http://www.imvu.com/technology/anomalous-behavior.pdf][Aberrant Behavior Detection in Time Series for Monitoring Business-Critical Metrics]]"
+     - Detects a problem in number of users who invited their Hotmail contacts
+     - The cause was an external service provider changing an interface
+     - Detected via Holt-Winters forecasting.
+** What is AD?
+   - A way to help find signal in noisy metrics
+     - "unexpected values" on metrics
+   - Important to recognize that the anomaly in the metric that we are observing
+     is *not* the same as the *condition in the system* that produced the metric
+   - AD doesn't understand *anything* about your systems. It understands your
+     definition of unusual or abnormal values.
+   - "unusual" and "unexpected" === "statistically improbable"
+   - anomalies aren't the same as outliers (values that are very distant from
+     typical values). 
+     - Outliers are *common*, normal, even expected
+     - Anomalies may be outliers, but outliers aren't necessarily anomalies.
+** What is it Good for?
+   - Find unusual values of metrics in order to surface undetected problems.
+   - Find chnages in important metrics or process so humans can investigate.
+   - Reduce the surfaces are or search space when diagnosing a problem.
+   - Reduce the need to recalibrate thresholds across a variety of different
+     machines or services
+   - Augment a humans intuition and judgement
+   - CANNOT:
+     - provide root cause analysis or diagnosis (can certainly assist)
+     - provide hard yes or no answers about whether is an anomaly.
+       (best limited to probability of whether there might be one)
+     - prove that there is an anomaly in the system, only that somethign is unusual about a *metric*
+     - detect system faults, because a fault is different than an anomaly
+     - replace a human judgement and experience
+     - understand the meaning of metrics
+     - *work generally across all systems, all metrics, all time ranges, and all frequency scales*
+** How can you use it?
+   - Generally two options:
+     - Generate alerts
+       - a bit dangerous. Anomalies might not be rare, and can generate a lot of noisy alerts
+       - generally, don't alert on things that may have no impact or consequence
+     - Record events for later analysis
+       - assumption: anomaly detection is cheap enough to do online in one pass of data as it arrives in your system.
+         - too costly to do after the fact, interactively.
+* Modeling and Predicting
+  - AD is based on predictions derived from models
+  - VividCortex's Adaptive Fault Detection algorithm uses [[https://en.wikipedia.org/wiki/Little's_law][Little's Law]], because they know the systems they monitor obey it.
+  - governing principle's might not be evident, so you have to fit a model to the observed system as best you can.
+  - Almost all *online* time series AD works by comparing current value to a prediction based on previous values.
+** Statistical Process Control
+  - based on operations research to implement quality control in eng systems such as manufacturing.
+  - One metric might be size of a hole drilled in a part.
+    - If the hole is out of tolerance limits, might hint that bit is loose, or dull.
+  - [[http://www.itl.nist.gov/div898/handbook/pmc/section1/pmc12.htm][Engineering Statistics Handbook]]
+*** Basic Control Chart
+    - control chart that represents values as clustered around a mean and control limits
+      - A.K.A. Shewhart control chart
+    - fixed mean is a value that we expect (e.g. size of drill bit)
+    - control lines are fixed on some number of standard deviations away from that mean
+      - i.e. the acceptable range of values.
+    - fixed control chart assumes values are *stable*. the mean and spread of values is constant
+    - this set of assumptions can be expressed as $\gamma = \mu + \sigma$
+      - WHERE:  \mu = constant mean
+                \sigma = a random variable representing noise, assumed Gaussian
+    - Fixed control charts have following characteristics:
+      - Assume fixed or known mean and spread of values
+      - The values are assumed to be Gaussian distributed around the mean
+      - They can detect one or more points that are outside the desired range
+    - MAJOR PROBLEM: assumption of stability (e.g. stationary: consistent mean, spread over time)
+*** Moving Window Control Chart
+    - Many systems change rapidly, so assumption of fixed mean isn't possible
+    - You'll get false positives or fail to detect real anomalies
+    - Fixing this requires adapting to mean and spread over time:
+    - Two basic ways:
+      - Slice up your control chart into smaller time ranges (fixed windows). 
+        - treat each window as it's own independent fixed control chart
+        - values within window are used to compute mean / stdev
+        - larger scale: you have a control chart that chagnes across windows
+      - Use a moving window (e.g. sliding window).
+        - Use last N points to compute the mean
+        - Can be expensive depending on size of windows
+        - Poor characteristics in the presence of *large spikes*
+          - causes an abrupt shift in window until the spike leaves, which causes another abrupt shift
+    - MWCC's have following:
+      - Require you to keep some amount of historical data to compute mean / and limits
+      - Values are assumed Gaussian
+      - Can detect one or multiple points outside of range
+      - Spikes in the data cause abrupt changes in parameters
+*** Exponentially Weighted Control Chart
+    - Solves the "spike-exiting" problem by replacing the fixed-length window with an infinitely large, gradually decaying window.
+      - made possible by expoentially weighted moving average
+        - disadvantage: values are nondeterministic since they have essentially infinite history, making them difficult to troubleshoot
+    - values never move out of the tail, so never an abrupt shift when a large value gets older
+    - still can be abrupt shifts at the head when large value is *first* observed.
+      - not generally as bad as a problem, because it's changing in response to current data instead of very old data.
+    - Control limit lines need some trickery to compute:
+      - One method is to keep another EWMA of the *squares* of values then use the following:
+        (Y) SQRT( (Y) (Y) # ???? Typeset weird, might be eroneous.
+    - EWCC's have following:
+      - Memory and CPU efficient
+      - Values are assumed Gaussian 
+      - Can detect one or multiple points that are outside the desired range
+      - A spike can temporarily inflate the control lines enough to cause missed alarms afterwards
+      - Can be difficult to debug because the EWMA's value can be hard to determe from the data itself, it's it is based on potentially "infinite" history.
+*** Window Functions
+    - Sliding windows and EWMAs are part of a bigger category of /window functions/
+    - Some functions increase smoothly from 0 to 1 and back again, meaning they smooth data using both past and future data.
+    - Smoothing bidirectionally can eliminate the effects of large spikes
+    - Require a larger time delay, which is a result of not knowing the smoothed value until enough future values have been observed.
+    - EWMAs are a good enough compromise for situations where you can't wait for future values.
+    - Control charts based on bidirectional smoothing have:
+      - introduce lag into calculations due to need to wait for future values
+      - require more memory and CPU
+      - assume Gaussian distribution of incoming values
+*** More Advanced Time Series Modeling
+    - [[http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc444.htm][ARIMA]] Models, Resource: [[https://www.otexts.org/fpp/8][Forecasting: principles and practice]]
+    - Many models, methodology stays the same. 
+      - Fit or train a model to sample data.
+      - Fitting means that parameters are adjusted to minimize the deviations between the sample data and models' prediction.
+    - ARIMA models have plenty of toggles to include or exclude portions which can be adjusted as needed.
+    - Real value in studying Box-Jenkins approach is the method itself, which remains consistent across all models and provides a logical way to reason about time series analysis
+** Predicting Time Series Data
+   - All of the above things are used for prediction
+   - AD is usually interested in predicting one step ahead, and then comparing to the next value we see.
+   - Prediction methods spectrum:
+     - Simplest one-step-ahead prediction is to predict that it'll be the same as the last value
+       - This doesn't work well if systems aren't stable (stationary) over time.
+     - Predict that the next value will be the same as the /recent central tendency/ instead.
+       - "The next value will be the same as the current average of recent values" -- could be any summary stat, though
+       - Predicts that values will *most likely* be close to what they've typically been recently.
+     - Predicting a likely range of values centered around a summary stat.
+       - Boils down to mean + stdev, or EWMA with EWMA control limits
+     - All of these use parameters. Non-parametric methods, such as histograms of historical values, can also be used.
+** Evaluating Predictions
+   - Usually using "many standard deviations from the mean" as a replacement for "very unlikely"
+   - Fit tends to be much worse in the tails, so small deviations from Gaussian can result in many more outliers than you should theoretically get.
+   - p-value, and other tests might be "significant" or "good", but that doesn't necessarily signify much!
+   - AD techniques will probably give you more false positives than you think they will.
+** Common Myths about Statistical Anomaly Detection
+   - Commonly hear claims that SPC won't work because system metrics are not Gaussian
+     - This is an oversimplification that comes from a confusion about stats.
+     - Realistically:
+       - It's not important that the *data* is Gaussian. What matters is whether the *residuals* are Gaussian
+       - The histogram you used to say "my data isn't Gaussian" is *sample* data. The *population* is the important part.
+*** The Data Doesn't need to be Gaussian
+    - *The residuals, not the data, need to be Gaussian to use 3-sigma rules*
+    - Residuals are errors in prediction. The difference between predictions your model makes, and the values you actually observe.
+    - Every type of control chart discussed before works this way
+      - It models the metric's behavior somehow. 
+        - EWMA charts implied model is "the next value is likely to be close to the current value of the EWMA"
+        - It subtracts the prediction from the observed value
+        - It effectively puts control lines on the residual. The idea is that the residual is now a stable value, centered around zero.
+    - Any control chart can be implemented either way:
+      - Predict, take the residual, find the limits, evaluate whether the residual is out of bounds.
+      - Predict, extend the control lines around the predicted value, evaluate whether the value is within bounds.
+      - "Its the same thing. Just a matter of doing the math in a different order. The operations are commutative, so it doesn't matter."
+*** Sample Distribution vs. Population Distribution
+    - In stats, we usually are trying to use a sample to infer something about the large population of data which we don't have.
+    - "Is the sample Gaussian" is the wrong question.
+      - "How likely is it that this sample came from Gaussian population?" -- is better.
+      - TODO: Learn about [[https://en.wikipedia.org/wiki/Normality_test][normality]] tests, to answer the above.
+    - Note: The Central Limit Theorem does *not* guarantee samples from *any* population will be Normal.
+** Conclusions
+   - All anomaly detection relies on predicting an expected value, or range of values for ametric, and comparing observations to the predictions.
+   - SPC is ubiquitous and very useful when paired with a good model.
+     - It also embodies a thought process that is tremendously helpful.
+   - You need to evaluate your model.
+   - SPC relies on Gaussian residuals. Ensure your model produces them with Normality testing.
+* Dealing with Trends and Seasonality
+

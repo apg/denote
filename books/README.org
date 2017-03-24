@@ -6,3 +6,7 @@
 * TODO [[https://en.wikipedia.org/wiki/Exit,_Voice,_and_Loyalty][Exit, Voice, and Loyalty]]
 * TODO [[https://en.wikipedia.org/wiki/The_Mythical_Man-Month][The Mythical Man-Month]]
 * TODO [[https://en.wikipedia.org/wiki/The_Book_of_Five_Rings][Book of Five Rings: The Classic Guide to Strategy]] -- Miyamoto Musashi :strategy:
+* DONE [[./anomaly-detection-for-monitoring.org][Anomaly Detection for Monitoring: A Statistical Approach to Time Series Anomaly Detection]] 
+  CLOSED: [2016-03-16 Wed 13:24]
+
+
