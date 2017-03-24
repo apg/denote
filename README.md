@@ -1,6 +1,6 @@
 # denote
 
-Back in high school I had a clever, dorky English teacher who was a
+Back in high school I had a clever, but dorky, English teacher who was a
 hard ass, but also someone I really adored. Well, one day, we were
 discussing some SAT vocabulary words, one of which was "demise."
 
