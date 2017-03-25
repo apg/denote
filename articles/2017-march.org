@@ -1,9 +1,58 @@
 #+TITLE: March 2017 Articles
 
-* TODO [[https://docs.google.com/document/d/199PqyG3UsyXlwieHaqbGiWVa8eMWi8zzAn0YfcApr8Q/edit#!][My Philosophy on Alerting]]
+* DONE [[https://docs.google.com/document/d/199PqyG3UsyXlwieHaqbGiWVa8eMWi8zzAn0YfcApr8Q/edit#!][My Philosophy on Alerting]]
+  CLOSED: [2017-03-25 Sat 01:13]
 Rob Ewaschuk
 
-(I've read this before. Refresh with notes)
+** Pages should be urgent, important, actionable, and real.
+   - They should require human intelligence to deal with.
+   - ASK:
+     - Does it detect something that's imminently user visible?
+       "nearly full and getting fuller" and "N+0" zero redundancy counts.
+     - Will I ever be able to ignore this rule? Can I refine the rule to make sure I never have to ignore it?
+     - Is this going to definitely hurt users?
+     - Can I take action on this alert?
+     - Will I get paged for something else that will fix this problem?
+** Vernacular
+   - *page*: anything that tries to urgently get the attention of a specific human
+   - *rule*: any kind of logic for detecting some interesting condition in any monitoring system
+   - *alert*: a manifestation of that rule that intends to reach a human.
+** Symptoms, not causes
+   - Availability and correctness
+   - Latency
+   - Completeness, freshness, durability
+   - Features that are important are working correctly. This probably just ties into availability / correctness, I'd think
+   - Alert on the data unavailability, not the fact that the database is unreachable.
+     - You're going to have to catch the symptom anyway
+     - You'll end up with redundant alerts
+     - Allegedly inevitable, is not always inevitable.
+** Best alerts come from the client perspective.
+** Causes can still be useful, but use as context
+   - When you discovery a rule that's a cause, check that the symptom is caught as well. Make it so otherwise.
+   - Print a terse summary of all of your cause-based rules that are firing in every page you send out.
+   - Example:
+     #+begin_src
+      TooMany500StatusCodes
+      Served 10.7% 5xx results in the last 3 minutes!
+      Also firing:
+          JanitorProcessNotKeepingUp
+          UserDatabaseShardDown
+          FreshnessIndexBehind    
+     #+end_src
+** Tickets, reports and emails are sub critical, but should be dealt with daily.
+   - Every alert should be tracked through a workflow system. :thinking_pose: 
+   - Automatic only works if things can be threaded and rolled up, though... 
+** Playbooks
+   - If you're playbook gets too long, you're probably spending too much time writing it, and not enough time fixing it.
+   - "The best playbooks I've seen have a few notes about exactly what the alert means, and what's currently interesting about an alert"
+** Review pages
+   - Weekly review of all pages
+   - Quarterly stats
+   - 10% false positives meric more consideration
+   - < 50% accurate alerts are broken
+   - AVOID: "I looked, but nothing was wrong", and remove it. Or demote it to something that you can gather statistics on.
+** Err on the side of removing noisy alerts – over-monitoring is a harder problem to solve than under-monitoring.
+** You should almost always be able to classify the problem into one of: availability & basic functionality; latency; correctness (completeness, freshness and durability of data); and feature-specific problems.
 
 * DONE [[http://peter.bourgon.org/blog/2017/02/21/metrics-tracing-and-logging.html][Metrics Tracing and Logging]]
   CLOSED: [2017-03-24 Fri 16:28]
