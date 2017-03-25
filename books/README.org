@@ -16,7 +16,7 @@
 * TODO [[http://www.oreilly.com/webops-perf/free/kubernetes.csp][Kubernetes: Scheduling the Future at Cloud Scale]]     :kubernetes:have:
 * TODO [[http://www.oreilly.com/webops-perf/free/lightweight-systems.csp][Lightweight Systems for Realtime Monitoring: Tools to unlock and understand your business data]] :have:
 * TODO [[http://www.oreilly.com/webops-perf/free/everything-is-distributed.csp][Everything Is Distributed]]                        :distsys:essays:have:
-
+* INPROGRESS [[https://leanpub.com/97-Things-Every-Programmer-Should-Know-Extended][97 Things Every Programmer Should Know - Extended]]          :dev:
 
 
 * TODO BOOKS [[https://medium.com/@kwindla/five-neglected-computer-science-classics-e0aefd24bf8e#.cxw4ywchw][5 Neglected Computer Science Classics]]         :unorganized:list:
