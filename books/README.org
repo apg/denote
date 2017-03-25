@@ -10,3 +10,7 @@
   CLOSED: [2016-03-16 Wed 13:24]
 
 
+
+* TODO [[http://get.threatstack.com/oreilly-devopssec-ebook][Threat Stack - O'Reilly DevOpsSec eBook]]                       :devops:
+* TODO [[http://home.iae.nl/users/mhx/sf.html][Starting Forth's home-page]]                                     :forth:
+* TODO BOOKS [[https://medium.com/@kwindla/five-neglected-computer-science-classics-e0aefd24bf8e#.cxw4ywchw][5 Neglected Computer Science Classics]]              :unorganized:

@@ -1,3 +1,6 @@
 #+TITLE: Conferences
 
 * DONE [[./srecon-americas-2017.org][SREcon Americas 2017]]
+
+* Not specific conferences, but talks none the less.            :unorganized:
+  - List: http://www.opowell.com/post/talks-that-changed-the-way-i-think-about-programming/
