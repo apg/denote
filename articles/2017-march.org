@@ -5,6 +5,19 @@ Rob Ewaschuk
 
 (I've read this before. Refresh with notes)
 
-* TODO [[http://peter.bourgon.org/blog/2017/02/21/metrics-tracing-and-logging.html][Metrics Tracing and Logging]]
+* DONE [[http://peter.bourgon.org/blog/2017/02/21/metrics-tracing-and-logging.html][Metrics Tracing and Logging]]
+  CLOSED: [2017-03-24 Fri 16:28]
 Peter Bourgon
 
+** Definitions
+   - Logging: discrete events. Highest volume
+   - Tracing: request scoped
+   - Metrics: aggregatable. Lowest volume, given compressibility
+*** As a Venn diagram, these three overlap consistently.
+    - Logging / Tracing:  Request scoped events
+    - Tracing / Metrics:  Request scoped metrics
+    - Metrics / Logging:  Aggregable events
+    - Metrics / Logging / Tracing: Request scoped, aggregatable events
+*** Due to Tracing request scope, not all metrics or logs, for example, can be shoehorned into a tracing system
+*** Shoehorning metrics into a logging pipeline may force us to abandon some advantages of a flexible query language to explore them.
+    - (Not sure I agree, see splunk. But maybe)
