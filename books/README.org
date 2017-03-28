@@ -21,6 +21,8 @@
 * DONE [[./anomaly-detection-for-monitoring.org][Anomaly Detection for Monitoring: A Statistical Approach to Time Series Anomaly Detection]] :have:anomaly:monitoring:timeseries:
   CLOSED: [2016-03-16 Wed 13:24]
 
+* DONE [[./mature-optimization.org][Mature Optimization]]                            :metrics:observability:
+  CLOSED: [2016-12-27 Tue 00:36]
 
 
 

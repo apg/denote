@@ -1,0 +1,315 @@
+#+TITLE:  Mature Optimization
+
+Source:  [[http://carlos.bueno.org/optimization/mature-optimization.pdf][Mature Optimization]]
+Author: Carlos Bueno
+
+* Intro
+  - "We should forget about small efficiences, say about 97% of the
+    time; premature optimization is the root of all evil. Yet we
+    should not pass up our opportunities in that critical 3%." --
+    Knuth, Structured Programming With go to Statements
+  - Performance optimization is, or should be a cost/benefit decision.
+  - [po] makes the most sense on mature sysstems whose architectures have "settled down"
+  - "Performance is a feature when your system has unusually limited
+    resources to play with or when it’s hard to change the software
+    after the fact."
+* Defining the Problem
+  - Measure what you are optimizing
+  - You need a *clear*, and *explicit* statement of the problem you
+    are trying to solve, or you have no idea what you are doing (in a
+    very real sense).
+  - "A problem definition must be falsifiable."
+    - *BAD*: "WidgetFactoryServer is too slow."
+    - What is too slow? How long a human waits? How long a downstream
+      service waits? Does not state anything to help us fix it.
+    - *GOOD*: "WidgetFactoryServer is transactional. It receives
+      requests and emits responses. It is probably CPU bound. So if
+      we profile to discover which functions take up the most time,
+      and optimize those, the total CPU time per transaction should
+      decrease."
+    - In the GOOD example we provide a thesis on what we believe is
+      bottlenecked, and suggests a method of finding the right places
+      to optimize, with a clear expectation of the result.
+  - Maybe you find that in one spot, "Iterating WidgetTypes is slow!"
+    But, this may not matter elsewhere as it's not in the critical
+    path.
+  - Every act of optimization needs to be an experiment. Start over
+    from scratch and make every assumption explicit and testable.
+  - Lessons from past optimizations aren't useless. They can *hint*
+    at where to look next, but never apply them blindly.
+  - "I once generalized from a single data point, and I'll *never* do
+    that again!" -- Achilles the Logician, /Lauren Ipsum/
+  - Flowchart:
+    1. Write Code
+       -> Is it fast? 
+          -> Yes: I don't believe you go to 2.
+          -> No: go to 2.
+    2. Measure it
+       -> go to 1.
+* Flying By Instruments
+  - "It is often a mistake to make a priori judgements about what
+    parts of a program are really critical, since the universal
+    experience of programmers who have been using measurement tools
+    has been that their intuitive guesses fail." -- Donald Knuth,
+    /Structured Programming With go to Statements/
+  - "Humans are bad at predicting the performance of complex systems,
+    even programmers"
+  - Our abiity to create them fools us into thinking we're also
+    entitled to understand them. -- Creator Bias.
+  - How it *works* and how it *performs* are very different things.
+  - Big-O complexity is almost never the reason your program is slow.
+    - Either N is so small that it doesn't matter, or N is so big
+      that the effects are *so* obvious that the bug gets fixed
+      quickly.
+    - That means, the coefficients, constant factors, and variability
+      -- the stuff you've been trained to ignore are the things that
+      are most important.
+  - It's easy to write off numbers that violate your expectations.
+  - It's easy to fall in love with numbers that agree with you.
+  - Test for things your theory predicts *should never* happen. If
+    your theory is correct, it should survive the evidential
+    crossfire of positive and negative tests.
+  - Being wrong /efficiently/ is what science is all about.
+  - Your goal isnt to out-computer the computer, or to be right. It's
+    to discover the truth. Optimize for the truth.
+
+* The Right Way to Be Wrong
+  - "It is better to do the right problem the wrong way than the
+    wrong problem the right way." -- Richard Hamming, /The Art of
+    Doing Science & Engineering/
+  - It's possible that your problem definition isn't just
+    falsifiable, it's flat out false.
+    - You might measure the wrong thing, or be looking at the wrong
+      part of the stack, etc.
+  - Numbers I always forget:
+    - Registers and CPU cache: 1ns
+    - RAM: 10^2 ns
+    - Local drives: 10^5, to 10^7 ns
+    - Network: 10^6, to 10^9ns
+* Continuous Systems
+  - "If something is important enough to worry about, it's important
+    enough to measure all the time."
+  - Because systems have cycles, and different usage patterns based on time...
+    - The diurnal and weekly cycles have important effects on
+      systems, software and the measurements you make.
+    - It's easy to see that metrics *averaged* over an entire day or
+      week are almost meaningless.
+    - *Best to compare the same hour and day of the week when
+      comparing 2 points in time.*
+  - "move computation to off-peak time" ... "precalculating or
+    precaching data sounds expensive, but computer time in the trough
+    is nearly free."
+* Instrumentation
+  - *measurement:* a number obtained during some kind of profiling event.
+  - *metadata:* attributes of the system or event that might influence
+    the measurements. (timestamp, machine name, compiler version,
+    error codes, etc)
+  - *sample:* a collection of measurements and metadata, an observation
+    of a single event.
+  - *metric:* a statement about a set of samples. typically an
+    aggregate number derived from some damples and a description of
+    the samples they come from.
+  
+    "The median walltime of WidgetFactoryServer, between 10am and
+    11am on 18 April 2013, in the West-coast datacenter, was 212msec"
+
+    "1.22% of hits returned an error code."
+  - Avoid the temptation to measure the first thing that comes into
+    your head, because it won't be random. It'll be the thing you
+    feel you understand best, but our feelings are probably wrong.
+  - You want to discover how it *performs*
+    - Not how it works.
+    - What does it consume? What does it output? Where does that happen?
+  - Lab measurements are a falsifiable theory, ie, that lab
+    conditions are sufficiently similar to production.
+  - You need to measure in production, too.
+  - Add more layers based on what your measurements tell you.
+    - Slow database? Add a query log
+    - Lots of CPU, use a CPU profiler
+
+* Storing your Data
+  - *Computing aggregates and then throwing away your raw data is
+    premature optimization.*
+    - In exchange for the space, you have created a hidden dependency
+      on clairvoyance!
+  - Store high resolution in a fast database, but only the last few
+    weeks or months. Explore the raw, *then* render it down to
+    road-tested metrics and store them for the long term.
+  - State of the user (logged in, not logged in) has a non-trivial
+    affect on response time in some cases.
+  - Including lots of environmental data helps you look at the
+    performance of larger components of the system.
+    - Are the webservers equally loaded? Datacenters?
+
+* Check Your Yardsticks
+  - "Prudent physicists -- those who want to avoid false leads and
+    dead ends -- operate according to a longstanding principle: Never
+    start a lengthy calculation until you know the range of values
+    within which the answer is likely to fall (and, equally
+    important, the range within the answer is *unlikely* to fall)."
+    -- Hans Christian van Baeyer, /The Fermi Solution/
+  - Errors propagate. Measurement is tricker than it appears. 
+    - Yardsticks have differences due to manufacturing and error
+      propagation. So too will our measurements.
+    - A bug in user facing code results in bad experience.
+    - A bug in measurement code results in bad *decisions*
+  - General checks:
+    - Negative numbers are almost always wrong
+    - Blindly recording CPU or walltime measurement of 1.3 billion
+      seconds. (Wall clock / Duration via unix timestamp, can get 0
+      in the before or after if you aren't careful)
+    - CPU time should never be greater than walltime in a
+      single-threaded program, and the sum of component times should
+      never be greater than the overall measure.
+  - Measure two ways to for independent confirmation.
+    - ie. bring your yardstick to the hardware store to buy a new
+      yardstick.
+  - CPU time is the number of miilseconds during which you rpgram was
+    executing instructions on a chip.
+    - Are all millis equivalent? Some or most of the time cna be
+      spent waiting for data in RAM (as opposed to cache)
+
+* Ontology
+  - "One of the miseries of life is that everbody names things a
+    little bit wrong." -- Richard Feynman, /Computers From the Inside
+    Out/
+  - Make sure you get the names and units right.
+  - Units should have greater precision than you need, so whole
+    classes of errors can be avoided.
+  - 64-bit integers can store half a million years worth of time in
+    microseconds. 
+  - Reducing precision to fit into a 32-bit ineger is a recipe for
+    regret.
+  - Store as bytes, not kilobytes, though slight danger in overflow.
+  - CPU instructions maybe as kinst (1,000s of instructions)
+  - Write down your ontology. Explain what the words mean, the units
+    they describe and be *firm* about consistency.
+
+* Visualization
+  - "The moment Bill Gates steps onto a city bus, everyone on the
+    bus, *on average*, is a billionaire."
+  - The fewer types of visualizations you add, the better you'll be.
+  - Insight is teh goal. Not pretty pictures.
+  - Focus on fluidity of exploration.
+  - "As a general principle, if you ever catch yourself doing mental
+    arithmetic, or pointing to two spots on a graph, or (worse) two
+    separate graphs, that means your tool is missing a feature."
+  - Use relative time, not raw time.
+  - Comparison of time series by drawing a second dotted line.
+  - Have a histogram or density graph.
+  - Scatter plot: rare for metadata and measurements to be completely
+    independent, and the scatter is a quick way to see whether there
+    is a relationship between them.
+
+* Monitoring & Diagnosis
+  - "Work in the real world involves detecting when things have gone
+    awry; discriminating between data and artefact; discarding red
+    herrings; knowin when to abandon approaches that will ultimately
+    become unsuccessful; and reacting smoothly to escalating
+    consequences." -- Richard Cook, /Gaps in the Continuity of Care
+    and Progress on Patient Safety/
+  - With networked applications the line between operations and
+    performance gets blurry.
+  - "The dashboard is a really good place to apply that trick of
+    stating theories in terms of what they predict *won't*
+    happen. Finsih the following sentence by filling in the blanks:" 
+    - While the system is operating normally, the _______ graph
+      should never _________.
+  - Those sentences should be graphs on your dashboard.
+  - Common mistake to overload your dashboard with *too* much information.
+  - "meaningful changes" can be negative (e.g. a drop in $X)
+    - Crashing is cheap. Are we skipping some work? Check error rates
+    - No errors logged, but no data returned either? Average bytes
+      per transaction, distribution, etc.
+    - Flood of cheap hits skewing the average?
+    - Faster servers?
+    - Turn off slower servers?
+    - Servers just died?
+  - Overtime you build up knowledge about failure modes
+  - Anytime an incident is solved using a non-standard metric, or
+    view, or filter, it should be added as a diagnosis tool.
+  - Probably relevant metrics to any large networked application:
+    - Error rates
+    - Latency (average, median, *low and* high percentiles)
+    - CPU Time / instructions
+    - Network TX/RX
+    - Requests per second
+    - Active Users 
+    - Active servers
+    - Server utilization (CPU, RAM, i/o)
+    - Cache hit / miss rates
+    - DB queries
+  - Create hierarchies
+    - When the _____ is operating abnormally, the _____ graph can
+      eliminate _______ as a possible cause.
+  - "Correlation doesn't imply causation, but it does waggle its
+    eyebrows suggestively and gesture furtively while mouthing 'look
+    over there'." -- Randall Munroe, *xkcd.com/552*
+
+* Wholesale Optimization
+  - The first instance of any programmer who has had the duty of
+    watching graphs is automation
+  - The second instinct is usually to solve it with thresholds, and
+    trigger an alarm or email when crossed.
+  - *(At least) Three problems with static thresholds.*
+    - Dependency on clairvoyance snuck in the back door. How do you
+      decide what the threshold is?
+    - There's only one number! Performance varies hour-by-hour as
+      seen before
+    - You probably want to know when the metric you're watching falls
+      *below* the expected range, too.
+  - Static thresholds *do make sense* when setting SLAs.
+  - For a set of metrics, take 25th, 75th and 99th percentiles of
+    walltime and cpu_time and compare it to the same timeframe a week
+    before, so same time frame. Alert if the metrics deviate too much
+    from what the data predicts, on a percentage basis or something
+    fancier like the root mean square error.
+  - Automating a bad *manual* process will only create a bad
+    *automatic* process.
+  - Time of day and day of week are *huge* factors in performance. We
+    can guess at what the others will be, but the only way to know
+    for sure is to obsess of the data.
+  - Anomaly detection. "Keep it simple. It doesn't have to be smarter
+    than a human. It only has to be more complete and easily
+    extended"
+  - "Once an alarm condition is met, say overall wall- time, your
+    monitoring system could quickly try many combi- nations of
+    dimensions in that set of samples to see whether the anomaly can
+    be localized further, say by datacenter or user type. This is
+    similar to the “almost mechanical” recursive sub- dividing of the
+    dataspace discussed earlier on in the book."
+  - "When you successfully use a computer you usually do an
+    equivalent job, not the same old one... the presence of the
+    ocmputer, in the long run, changed the nature of the many
+    experiments we did." -- Richard Hamming, /The Art of Doing
+    Science & Engineering/
+
+* Feedback Loops
+  - Control Theory?
+  - Aside from general correctness, feedback loops for dist systems come with three hard problems to solve:
+    - Reaction time: How quickly the entire system can react to changes in the feedback it's collecting.
+    - Staircase mode: When your feedback loop fails, and it will, think about whether it becomes a staircase or a death trap.
+    - Oscillation: happens when one or more components overcompensate.
+  - Adaptive sampling is hard. You can take a look at the last few
+    weeks of data and build a curve of "rate multipliers" for every
+    30-minute chunk of the day. Need to recalculate every few weeks,
+    at most.
+
+* Starting Over
+  - "The goal is to reliably make a system more efficient in time,
+    compute, memory, etc. Only a fraction of the code matters for
+    this, hence the term "bottleneck". A continuous cycle of
+    measurement to find high-leverage spots and isolated fixes for
+    them works best."
+    - As a problem definition, it's not very good. Doesn't address
+      the assertions and isn't obviously falsifiable. Lots of
+      slipperiness packed into the words "reliably" and "best".
+  - Incidental vs Fundamental bottlenecks
+    - Incidental: tend to be isolated and fixable without much fuss. Don't threaten the basic premises of your design
+    - Fundamental: harder to fix and *see*, caused by some fact of nature or an assumption the system is built around.
+      - Once found, a decision needs to be made. Possible to remove? is it worth doing?
+
+* TODO Follow ups
+   - Design of Experiments: https://en.wikipedia.org/wiki/Design_of_experiments
+     - Book: Principles of Experiment Design & Measurement
+
