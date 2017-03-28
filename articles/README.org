@@ -1,13 +1,17 @@
 #+TITLE: Articles to Read at some point.
 
-* TODO [[http://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf][Use for Formal Methods at AWS]]                                 :formal:
+* TODO [[https://scholar.harvard.edu/files/mickens/files/thesaddestmoment.pdf][Mickens: saddest moment]]
+* TODO [[https://www.speedshop.co/2015/07/29/scaling-ruby-apps-to-1000-rpm.html][Scaling Ruby Apps to 1000 Requests per Minute - A Beginner's Guide]]
+* TODO [[http://pub.gajendra.net/2016/03/time_series][Simple Time Series Analysis]]
+* TODO [[https://www.udacity.com/wiki/ud156-readings][Papers for GT OS Class (SHOULD READ THESE)]]][don't forget about this inspiration]]
+* TODO [[http://dsrg.pdos.csail.mit.edu/papers/][Papers]]
+* TODO [[https://deis.com/blog/2016/kubernetes-illustrated-guide/][The Children's Illustrated Guide to Kubernetes]]
 * TODO [[http://alexott.net/en/fp/books/#sec12][Functional programming books overview]]
 * TODO [[http://belkadan.com/blog/2016/05/So-You-Want-To-Be-A-Compiler-Wizard/][So You Want to Be a (Compiler) Wizard // -dealloc]]
 * TODO [[http://blog.felipe.rs/2017/02/25/id-software-programming-principles/][id Software Programming Principles]]
 * TODO [[http://blog.felixangell.com/blog/virtual-machine-in-c][Implementing a virtual machine in C]]
 * TODO [[http://bravenewgeek.com/take-it-to-the-limit-considerations-for-building-reliable-systems/][Take It to the Limit: Considerations for Building Reliable Systems]]
 * TODO [[http://docker-saigon.github.io/post/Docker-Internals/][Docker Internals]]
-* TODO [[http://dsrg.pdos.csail.mit.edu/papers/][Papers]]
 * TODO [[http://files.catwell.info/misc/mirror/lua-5.2-bytecode-vm-dirk-laurie/lua52vm.html][Lua interpreter design]]
 * TODO [[http://okmij.org/ftp/ML/generalization.html][Efficient and Insightful Generalization]]
 * TODO [[http://some.ops4devs.info/][Ops4Devs]]
@@ -18,7 +22,6 @@
 * TODO [[http://www.inventio.co.uk/colorForth%20and%20the%20Art%20of%20the%20Impossible.htm][ColorForth and the Art of the Impossible]]
 * TODO [[http://www.ultratechnology.com/ahatalk.htm][Transcript of presentation on the History of Forth and aha]]
 * TODO [[https://blog.dnsimple.com/2016/11/troubleshooting-theory/][Improve your Dev and Ops skills with Troubleshooting Theory - DNSimple Blog]]
-* TODO [[https://deis.com/blog/2016/kubernetes-illustrated-guide/][The Children's Illustrated Guide to Kubernetes]]
 * TODO [[https://eev.ee/blog/2016/09/15/music-theory-for-nerds/][Music theory for nerds / fuzzy notepad]]
 * TODO [[https://eng.uber.com/pyflame/][Pyflame: Uber Engineering’s Ptracing Profiler for Python]]
 * TODO [[https://gist.github.com/timf/6245678][A sample of auto-scaling and related papers]]
@@ -28,11 +31,9 @@
 * TODO [[https://medium.com/bradfield-cs/the-cost-of-forsaking-c-113986438784#.mjuw9upth][The cost of forsaking C]]
 * TODO [[https://plusbryan.com/my-first-5-minutes-on-a-server-or-essential-security-for-linux-servers][My First 5 Minutes On A Server; Or, Essential Security for Linux Servers]]
 * TODO [[https://recompilermag.com/issues/issue-1/ssl-its-hard-to-do-right/][SSL: it’s hard to do right | The Recompiler]]
-* TODO [[https://scholar.harvard.edu/files/mickens/files/thesaddestmoment.pdf][Mickens: saddest moment]]
 * TODO [[https://stripe.com/blog/service-discovery-at-stripe][Service discovery at Stripe]]
 * TODO [[https://training.kalzumeus.com/newsletters/archive/investing-for-geeks?][Investing For Geeks]]
 * TODO [[https://www.bsdfrog.org/pub/events/my_bsd_sucks_less_than_yours-AsiaBSDCon2017-paper.pdf][OpenBSD vs FreeBSD]]
-* TODO [[https://www.speedshop.co/2015/07/29/scaling-ruby-apps-to-1000-rpm.html][Scaling Ruby Apps to 1000 Requests per Minute - A Beginner's Guide]]
-* TODO [[https://www.udacity.com/wiki/ud156-readings][Papers for GT OS Class (SHOULD READ THESE)]]][don't forget about this inspiration]]
-* TODO [[http://pub.gajendra.net/2016/03/time_series][Simple Time Series Analysis]]
+
+
 
