@@ -1,0 +1,112 @@
+#+TITLE: Use of Formal Methods at Amazon Web Services
+
+Source: [[http://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf][Use for Formal Methods at AWS]]
+Chris Newcombe, Tim Rath, Fan Zhang, Bogdan Munteanu, Marc Brooker, Michael Deardeuff
+
+* Formal specification in use at AWS since 2011 to help solve difficult design problems in critical systems.
+* 6 Years after S3 launch, 1 trillion objects.
+  - Less than 1 year later, 2 trillion. Handling 1.1 million r/s!
+* Lots of literature, but combining distributed algorithms into a cohesive system is a major challenge.
+  - Algorithms usually have to be modified to work in real world systems.
+  - Must invent their own algorithms. Try hard to not be complex.
+* Require high level of confidence that system is correct.
+  - Standard industry tooling not sufficient.
+    - design reviews, code reviews, static code analysis, stress testing, fault-injection, et. al.
+    - Subtle bugs still lurk despite.
+* Human intuition is poor at estimating true probability of supposedly 'extremely rare' events. :keynote:
+  - "To a first approximation, we can say that accidents are almost always the result of incorrect estimates of the likelihood of one or more things." -- C. Michael Holloway, NASA
+* Often the subtle, dangerous bugs are in *design*, not implementation.
+  - As such, testing code is inadequate.
+* Precise Designs
+  - At least 2 major benefits to this
+    - Author is forced to think more clearly, helping to eliminate 'plausible hande-waving'
+    - Tools can be applied to check for errors in the design, even while it is being written.
+  - Needed to be able to capture the essence of a design in a few hundred lines of precise description.
+    - needed highly expressive language, with precise semantics
+    - Choose TLA+
+* TLA+
+  - Based on simple discrete math (set theory and predicates).
+  - Specification describes the set of all possible legal behaviors of the system.
+  - correctness properties and system designs are just steps on a ladder of abstraction.
+  - Intended to make it as easy as possible to show that a system design correctly implements the desired correctness properties, either by reasoning, or the exhaustive model checker.
+  - PlusCal is a C like, replacement for psuedocode that's compatible with TLA+
+* The Value of Formal Methods for "Real-World Systems"
+  - Industry perception suggests formal methods are too much work and training to verify only the tinest of code.
+    - AWS found otherwise.
+    - Have used TLA+ on 10 large complex systems and TLA+ added significant value. 
+      - Found subtle bugs
+      - Gave confidence to aggressively optimize without sacraficing correctness.
+  - Entry level engineers, to Prinicpal pick up TLA+ in 2 to 3 weeks without a lot of help or training.
+** Usage Table:
+
+| System                            | Components                                                | Line Count (excl comments) | Benefit                                                                         |
+| S3                                | Fault tolerante low-level network algorithm               | 804 PlusCal                | 2 bugs. Further bugs in proposed optimizations                                  |
+|                                   | Background redistribution                                 | 645 PlusCal                | 1 bug. Found bug in first proposed fix                                          |
+| DynoamoDB                         | Replication and group membership                          | 939 TLA+                   | 3 bugs, some requiring traces of 35 steps                                       |
+| EBS                               | Volume management                                         | 102 PlusCal                | 3 bugs                                                                          |
+| Internal distributed lock manager | lock free data structure                                  | 223 PlusCal                | Improved confidence. Failed to find a liveness bug as we did not check liveness |
+|                                   | Fault tolerante replication and reconfiguration algorithm | 318 TLA+                   | 1 bug. Verified aggressive optimization                                         |
+
+* Side Benefit: A better way to Design Systems
+  - Engineers naturally focus on design the "happy case" for a system
+    - No small feat
+  - Then asks "What might go wrong?"
+    - Then mitigates prioritized by intuition and probability of occurance.
+    - Never handles the extremely rare cases
+  - CONTRAST With Formal Specification
+    - ASKS "What needs to go right?"
+    1. State what the system should do, by defining correctness properties
+       - Safety properties: "What the system is allowed to do"
+         Ex: "At all times, all committed data is present and correct."
+         Or equivalently: "at no time can the system have lost or corrupted any committed data."
+       - Liveness properties: "What the system must eventually do"
+         Ex: whenever the system recieves a request, it must eventually respond to that request.
+    2. What must go right? by explicitly specifying all of the properties of the environment on which the system relies
+       Ex: "if a communication channel has not failed, then messages will be propagated along it." 
+       Ex: "if a process has not restarted, then it retains its local state, modulo any intentional modifications.
+    3. With the goal of confirming design correctly handles all of the dynamic events in the environment... 
+       Specify the effects of each of those possible events (network errors, repairs, disk errors, process crashes, restarts, data center failuers... )
+    4. Use the model checker to verify that the specification of the system impleemtns chosen correctness properties, despite any combination or interleaving of events in the.
+  - *"What needs to go right?", significantly less error prone than "what might go wrong?"*
+* More Side Benefits: Improved Understanding, Productivity and Innovation
+  - Can rapidly verify that even deep changes as a result of constant development are safe, or unsafe without doing harm.
+  - Excellent form of documentation
+    - *Literate TLA+???*
+* What Formal Specification is Not Good For
+  - Good for bugs and operator errors that cause a departure from the logical intent of the system
+  - Not good for complex systems that inevitable contain feedback loops.
+    - A common example is when a slowdown (e.g. GC) causes timeouts, which causes retries, which adds load, with causes slowdown.
+    - Not a livelock, deadlock, or other cycle.
+      - But a customer notices unacceptable response times. 
+    - TLA+ could be used to specify upper bound on response time, as a real-time safety property.
+      - But, infrastructure doesn't support real-time scheduling or guarantees, so real-time safety not realistic.
+      - Not yet sure how to model the prolonged slowdowns they consider to be erroneous.
+* TODO First Steps to Formal Methods
+  - Old systems used contract assertions in production, "recovery-oriented computing" 
+    - Reactive mechanisms can't recover from class of bugs that cause permanent damage to data. Need to prevent.
+  - Evidence to overcome bias on Formal Methods from paper by Pamela Zave.
+    - Zave used Alloy to find serious bugs in membership protocol of Chord.
+  - Wrote a large specification for a concurrent algorithm, but found Alloy not expressive enough for their use cases.
+    - http://hpts.ws/papers/2011/sessions_2011/Debugging.pdf
+  - Gained confidence in TLA+ after seeing Specification of Paxos in TLA+, and DEC/Compaq's use in the Alpha CPU cache coherency model.
+    - Lamport, L. Fast Paxos.
+      - https://www.microsoft.com/en-us/research/publication/fast-paxos/?from=http%3A%2F%2Fresearch.microsoft.com%2Fpubs%2F64624%2Ftr-2005-112.pdf
+* First Big Success at Amazon
+  - With DynamoDB, extensive tests done. Informal proofs done. Still had bugs, and difficult to verify.
+    - TLA+ wrote a specification in a couple of weeks.
+* Persuading More Engineers Leads to Further Successes
+  - Decided to sway engineers to think in terms of debugging, rather than verification.
+    - Gave this presentation: http://hpts.ws/papers/2011/sessions_2011/Debugging.pdf
+    - Avoided words "formal", "verification", "proof", and expanding "TLA"
+* Most Frequently Asked Question
+  - "How do we know that the executable code correctly implements the verified design?"
+    - We don't!
+    - Despite this:
+      - FM help engineers get the design /right/ which is the first step to getting code right.
+      - Help engineers gain better understanding of the design, increasing chances the code is right.
+      - Helps engineers find and pick the right assertions to add to the code.
+        Evidence at AWS shows that assertions are a great way to reduce errors in code. 
+        - Assertions checks small, local part of system invariant.
+        - Captures fundamental reason why system works, and system won't do anything wrong that could violate safety property as long as it maintains the system invariant.
+        - How do you find a good invariant that is strong enough?
+          - FM can help
