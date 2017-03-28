@@ -7,8 +7,8 @@
 * TODO [[http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.29.4871&rep=rep1&type=pdf][Synthesis: An Efficient Implementation of Fundamental Operating System Services (1992)]] :os:
 * TODO [[http://www.cs.tufts.edu/~nr/cs257/archive/luca-cardelli/functional-abstract-machine.pdf][Functional Abstract Machine]]                         :langs:functional:
 * TODO [[https://arxiv.org/abs/1702.01715][Software Engineering at Google]]                                   :dev:
-
-
+* TODO [[http://www.bailis.org/papers/hat-hotos2013.pdf][HAT, not CAP: Towards Highly Available Transactions]] :transactions:distsys:
+* TODO [[http://www.bailis.org/papers/acidrain-sigmod2017.pdf][ACIDRain: Concurrency-Related Attacks on Database-Backed Web Applications]] :concurrency:sec:distsys:
 * TODO [[http://dsrg.pdos.csail.mit.edu/papers/][Papers distsys]]                                           :unorganized:
 * TODO http://noisycode.com/blog/2015/02/28/cluster-reading-list/ :unorganized:
 
