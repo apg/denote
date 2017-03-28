@@ -6,8 +6,7 @@
 * TODO [[https://en.wikipedia.org/wiki/Exit,_Voice,_and_Loyalty][Exit, Voice, and Loyalty]]
 * TODO [[https://en.wikipedia.org/wiki/The_Mythical_Man-Month][The Mythical Man-Month]]                                          :have:
 * TODO [[https://en.wikipedia.org/wiki/The_Book_of_Five_Rings][Book of Five Rings: The Classic Guide to Strategy]] -- Miyamoto Musashi :strategy:
-* DONE [[./anomaly-detection-for-monitoring.org][Anomaly Detection for Monitoring: A Statistical Approach to Time Series Anomaly Detection]] :have:anomaly:monitoring:timeseries:
-  CLOSED: [2016-03-16 Wed 13:24]
+
 * TODO [[http://get.threatstack.com/oreilly-devopssec-ebook][Threat Stack - O'Reilly DevOpsSec eBook]]                  :devops:have:
 * TODO [[http://home.iae.nl/users/mhx/sf.html][Starting Forth's home-page]]                                :forth:free:
 * TODO [[http://www.oreilly.com/webops-perf/free/docker-networking-and-service-delivery.csp][Docker Networking and Service Discovery]]       :docker:networking:have:
@@ -16,7 +15,13 @@
 * TODO [[http://www.oreilly.com/webops-perf/free/kubernetes.csp][Kubernetes: Scheduling the Future at Cloud Scale]]     :kubernetes:have:
 * TODO [[http://www.oreilly.com/webops-perf/free/lightweight-systems.csp][Lightweight Systems for Realtime Monitoring: Tools to unlock and understand your business data]] :have:
 * TODO [[http://www.oreilly.com/webops-perf/free/everything-is-distributed.csp][Everything Is Distributed]]                        :distsys:essays:have:
-* INPROGRESS [[https://leanpub.com/97-Things-Every-Programmer-Should-Know-Extended][97 Things Every Programmer Should Know - Extended]]          :dev:
-
-
 * TODO BOOKS [[https://medium.com/@kwindla/five-neglected-computer-science-classics-e0aefd24bf8e#.cxw4ywchw][5 Neglected Computer Science Classics]]         :unorganized:list:
+* DONE [[./97-things-every-programmer-should-know-extended.org][97 Things Every Programmer Should Know - Extended]]                :dev:
+  CLOSED: [2017-03-27 Mon 23:25]
+* DONE [[./anomaly-detection-for-monitoring.org][Anomaly Detection for Monitoring: A Statistical Approach to Time Series Anomaly Detection]] :have:anomaly:monitoring:timeseries:
+  CLOSED: [2016-03-16 Wed 13:24]
+
+
+
+
+

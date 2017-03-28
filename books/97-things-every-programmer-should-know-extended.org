@@ -1,0 +1,140 @@
+#+TITLE: 97 Things Every Programmer Should Know -- Extended
+
+Source: [[https://leanpub.com/97-Things-Every-Programmer-Should-Know-Extended][97 Things Every Programmer Should Know - Extended]]
+
+* Acknowledge and Learn from Failures
+  - Denying failure means you've wasted your time
+* Avoid Programmer Churn and Bottlenecks
+  - Create timeboxes and adhere to them, instead of sitting there.
+* Be Stupid and Lazy
+  - Be stupid: Learn and be critical of your own work.
+  - To find the best solutions, start from a clean slate. 
+  - Keep an open mind. Explore all the possibilities
+  - Believing you have the *right* solution, might lead you to ignore a better one.
+* Become Effective with Reuse
+  - Software assets:
+    - need to fulfill functional and non-functional obligations
+    - integrate well
+    - enable realization of new and innovative business capabilities
+* Better Efficieny with Mini-Activities, Multi-Processing and Interrupted Flow
+  - If struggling with task, do mini-activities
+    - Extract the most basic things "create a file." "write this function." "Write code to construct this thing."
+  - Set a timer for every 15 minutes. Then do a mini activity. Repeat.
+* Consider the Hardware
+  - If you code your branch logic so that the most frequent result is the condition that is tested for, you will help your CPUS prefetch cache be "correct" more often, leading to fewer CPU-expensive cache invalidations.
+* Continuous Refactoring
+  - It is clearly wrong to deny the code the chance to grow with (your) knowledge and abilities
+* Continuously Align Software to Be Reusable
+  - Place value on making software assets resuable continuously.
+  - Align software assets closer and closer to a reusable state using relentless refactoring and code reviews.
+  - Do this slowly, on demand, and in alignment with business needs. 
+  - In other words, the goal is *eventual* reuse, not reuse from the start.
+* Declarative over Imperative
+  - Declarative code expresses intent rather than the method for achieving the intent.
+* Display Courage, Commitment, and Humility
+  - Courage is nothing without commitment
+  - You must be committed to fixing if things go wrong
+  - It's crucial to admit and reflect upon the mistakes made, to yourself and others as it helps in growth.
+* Done Means Value
+  - Too many ___-Driven Development. Why not Satisfaction-Driven Development? The satisfcation of the user.
+* Expect the Unexpected
+  - Don't consider only the thread of execution you expect to happen.
+  - Consider all the unusual things you think are unlikely to happen, too.
+  - Pessimist or optimist isn't problematic. It's about making the glass water tight so there's no spillages.
+* First Write, Second Copy, Then Refactor
+  - On the third reuse, refactor.
+* In the End, It's All Communication
+  - Avoid Remote Workers, and sit together (HA!)
+  - Develop a common language for communication the properties of your product with stake holders. "ubiquitous language"
+  - Can't become a great programmer without becoming a great communicator
+* Interfaces Should Reveal Intention
+  - Setters and Getters don't reveal the intention and responsibility of a behavior-centric interface. Seek an alternative.
+* "Leave it in a Better State"
+* Methods Matter
+  - Cognitive load can be reduced by keeping cyclomatic complexity low (ideally 3 or 4). 
+  - *Cyclomatic complexity* is a numeric value that can be easily computed by many tools and is roughly equivalent to the number of execution paths through a method.
+* The Programmer's New Clothes                                :keynote:quote:
+  - No one wants to admit that something is hard to understand in an industry where intelligence is the greatest virtue.
+  - We live and breathe the intricacies of the domain, becoming so fluent that we can't see the challenges of a novice.
+  - "Simple things should be simple, complex things should be possible" -- Alan Kay
+  - Understand the project end-to-end
+    - Should be easy to break down into tasks that are known to be solvable.
+  - It's an engineer's duty to prevent spiraling complexity
+  - "Everyone knows that debugging is twice as hard as writing a program in the first place. So if you're as clever as you can be when you write it, how will you even debug it?" -- Brian Kernighan
+* Push Your Limits
+  - You want to know your limits so you can learn and push past them.
+  - Most effective ways to extend your own limits is to explain code and concepts to fellow programmers.
+* Respect the Software Release Process
+  - To be effective, your release process needs to be
+    - simple
+    - repeatable
+    - reliable
+  - Tag every release, and make note of how to build, so you can reliably see what's happening in every version.
+* Restrict Mutability of State                                        :quote:
+  - "When it is not necessary to change, it is not necessary to change." -- Lucius Cary
+  - A large number of defects arise from (incorrect) modification of state.
+    - So, reduce the opportunity for state changes, and there will be fewer defects due to incorrect state modifications.
+  - If programmers have to call clone() to get somethign to work, they're going to forget it.
+  - Make modifications as *local* as possible
+* Reuse Implies Coupling                                            :keynote:
+  - We often fail to reuse software from our colleagues or from unrelated projects because we a) want to build it b) makes us depend on someone else.
+  - Dependency means you're no longer the smith of your own luck.
+* Scoping Methods
+  - Methods should only deal with a single level of abstraction, that is easily understandable.
+  - Shared private methods can be turned into public methods of a method object.
+* Simple is not Simplistic                                            :quote:
+  - "Very often, people confuse simple with simplistic. The nuance is lost on most." -- Clement Mok
+  - *simple:* easily understood or done; presenting no difficulty
+  - *simplicity:* treating complex issues and problems as if they were much simpler than they really are.
+  - Hacking a solution should be a deliberate choice. The costs -- tech debt -- have to be weighed against any gains.
+  - "Simplicity before understanding is simplistic; simplicity after understanding is simple." -- Edward De Bono
+* Small!
+  - Functions should be small. Just a few lines, with one or two levels of indent.
+  - Large and deeply nested functions are much more confusing than a list of small functions.
+  - Small functions are an adult's way to organize. (closet metaphor).
+* Soft Skills Matter
+  - Skills that help in a team situation
+    - Ability to communicate ideas and designs quickly and clearly
+    - Listen to the ideas of others
+    - Enough confidence to lead
+    - Enough self-esteem to follow
+    - The ability to teach
+    - Willingness to learn
+    - A desire to promote consensus combined with the courage to accept conflict in pursuit of that consensus
+    - Willingness to accept responsibility
+    - Respect for your teamates, above all else.
+* Speed Kills
+  - Bad code slows everyone down.
+  - The only way to go fast is to go well.
+  - To be a craftsman, and professional, you must not rush. Keep your code clean, so that it barely needs comments.
+* Structure over Function
+  - Low coupling, Single Responsibility Principle
+  - Consider code as "not working" unless it's actually working and easy for everyone to understand.
+  - Keep your code well organized, factored, and DRY.
+  - Understand and Evolve architecture to do more with less
+  - Avoid too much up-front genericity and refactor away from laborious specific solutions repeating code.
+* Talk about the Trade-offs                                         :keynote:
+  - Don't do a thing until you understand the attributes that the completed code is supposed to exhibit
+  - You will make trade-offs between different attributes of your code.
+  - Attributes: Standards compliance, Process strictness, Approachability, Reusability, Speed of Production, Performance, Correctness, Modifiability
+* There is Always Something More to Learn
+  - No more significant factor to project success than having programmers who have previously worked on successful projects.
+  - Very important to learn how to make a doomed project fail early.
+  - Even more valuable to learn how to turn around signs of doom into success.
+* There is No Right or Wrong
+  - There are, however, better and worse ways.
+  - Better and worse are subjective.
+  - Better usually has the following qualities
+    - Easier to modify
+    - More reliable with less down time, and higher degree of predictability
+    - Easier to read and understand
+    - Able to provide better performance using fewer resources
+* There is No Such Thing as Self Documenting Code
+  - Comment to explain the unusual (e.g. why backwards through a loop instead of i = 0 ... length ?)
+* Understand the Principles behind Practices                        :keynote:
+  - Principles describe the underlying ideas and values of the methods.
+  - Practices are what you do to realize them.
+  - Don't optimize before you understand why the current way isn't working for you.
+  - Understand what you're trying to accomplish. If you don't have a goal in mind when trying a new process, you won't be able to evaluate your progress meaningfully.
+* Write Code for Humans Not Machines
+  - If you feel you need to add a comment to clarify a name, it could be the first symptom that you should psend a minute to find a better name.
