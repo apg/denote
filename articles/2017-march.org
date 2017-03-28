@@ -1,6 +1,7 @@
 #+TITLE: March 2017 Articles
 
-* TODO [[https://scholar.harvard.edu/files/mickens/files/thesaddestmoment.pdf][The Saddest Moment]]
+* DONE [[https://scholar.harvard.edu/files/mickens/files/thesaddestmoment.pdf][The Saddest Moment]]
+  CLOSED: [2017-03-28 Tue 10:07]
 James Mickens
 
 ** Making distributed systems reliable is inherently impossible
