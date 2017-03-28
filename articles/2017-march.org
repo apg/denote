@@ -1,5 +1,15 @@
 #+TITLE: March 2017 Articles
 
+* TODO [[https://scholar.harvard.edu/files/mickens/files/thesaddestmoment.pdf][The Saddest Moment]]
+James Mickens
+
+** Making distributed systems reliable is inherently impossible
+   - Yet, we for whatever reason cling to Byzantine fault tolerance.
+** Intuitive arguments about Byzantine fault tolerance, are never intuitive. 
+   - Successful intuitive explanation must invoke experiences of real life.
+** Even if we're successful at Byzantine fault tolerance, it's still not enough.
+   - There will likely still be a human factor, with cables that can be pulled, etc.
+
 * DONE [[https://docs.google.com/document/d/199PqyG3UsyXlwieHaqbGiWVa8eMWi8zzAn0YfcApr8Q/edit#!][My Philosophy on Alerting]]
   CLOSED: [2017-03-25 Sat 01:13]
 Rob Ewaschuk

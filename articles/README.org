@@ -1,6 +1,5 @@
 #+TITLE: Articles to Read at some point.
 
-* TODO [[https://scholar.harvard.edu/files/mickens/files/thesaddestmoment.pdf][Mickens: saddest moment]]
 * TODO [[https://www.speedshop.co/2015/07/29/scaling-ruby-apps-to-1000-rpm.html][Scaling Ruby Apps to 1000 Requests per Minute - A Beginner's Guide]]
 * TODO [[http://pub.gajendra.net/2016/03/time_series][Simple Time Series Analysis]]
 * TODO [[https://www.udacity.com/wiki/ud156-readings][Papers for GT OS Class (SHOULD READ THESE)]]][don't forget about this inspiration]]
@@ -35,5 +34,5 @@
 * TODO [[https://training.kalzumeus.com/newsletters/archive/investing-for-geeks?][Investing For Geeks]]
 * TODO [[https://www.bsdfrog.org/pub/events/my_bsd_sucks_less_than_yours-AsiaBSDCon2017-paper.pdf][OpenBSD vs FreeBSD]]
 
-
-
+* DONE [[./2017-march.org][The Saddest Moment]]
+  CLOSED: [2017-03-27 Mon 23:34]
