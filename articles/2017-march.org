@@ -1,5 +1,16 @@
 #+TITLE: March 2017 Articles
 
+* DONE [[https://blog.jessfraz.com/post/containers-zones-jails-vms/][Setting the Record Straight: containers vs. Zones vs. Jails vs. VMs]] :containers:security:jails:zones:
+  CLOSED: [2017-03-28 Tue 10:13]
+  - Zones, Jails are first class concepts.
+  - Containers don't really exist. They are a combination of:
+    - namespaces and cgroups, which *are* first class objects.
+  - Namespaces are sharable, so... 
+    - You can share an X socket. Or, wireshark another container.
+  - "Containers come with just the pieces so while the box says to build the Death Star, you are not tied to that."
+  - Containers are not a Linux isolation primitive
+  - "Containers allow for a flexibility and control that is not possible with Jails, Zones, or VMs. And THAT IS A FEATURE."
+
 * DONE [[https://scholar.harvard.edu/files/mickens/files/thesaddestmoment.pdf][The Saddest Moment]]
   CLOSED: [2017-03-28 Tue 10:07]
 James Mickens
