@@ -1,5 +1,20 @@
 #+TITLE: March 2017 Articles
 
+* DONE [[https://tonyarcieri.com/it-s-time-for-a-memory-safety-intervention][It's time for a memory safety intervention]]           :security:memory:
+  CLOSED: [2017-03-29 Wed 00:30]
+ 
+  - Memory safey won't fix:
+    - shell escaping bugs
+    - logic bugs
+    - prevent an attacker who has obtained your HMAC key...
+    - prevent your XML-based credentials from accidentally doing something stupid in SAML
+  - unsafe code is still unsafe.
+  - With C, you're using unsafe memory model 100% of the time.
+    - "It's the programming equivalent of trying to walk a tightrope over a lake full of alligators while trying to avoid getting elctrocuted by dangling power lines."
+  - "The unfortunate answer is the whole apparatus of modern computing is built on a foundation that is fundamentally unsafe, and when we heap praise on iOS it’s only because it’s slightly less terrible than everything else."
+  - We need to collectively admit memory safety is a problem.
+
+
 * DONE [[https://blog.jessfraz.com/post/containers-zones-jails-vms/][Setting the Record Straight: containers vs. Zones vs. Jails vs. VMs]] :containers:security:jails:zones:
   CLOSED: [2017-03-28 Tue 10:13]
   - Zones, Jails are first class concepts.
