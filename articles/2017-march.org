@@ -1,5 +1,23 @@
 #+TITLE: March 2017 Articles
 
+* DONE [[https://hackernoon.com/python-sandbox-escape-via-a-memory-corruption-bug-19dde4d5fea5][Escaping a Python sandbox with a memory corruption bug]] :python:security:memory:
+  CLOSED: [2017-03-29 Wed 22:47]
+  - Author discovered a sandbox'd Python which he found a hole for, reported, got rewarded.
+    - Used relatively straightforward Python layer stuff.
+  - Looked to Numpy to explot more, as it's C, and might have a memory corruption bug of some kind.
+    - Found one that didn't have a CVE, in Github Issues.
+  - Unchecked integer overflow, resulting in realloc()
+    - A very large array can get allocated, but without sufficient size, leading to unchecked access to memory, e.g. segfault.
+  - Python's `id` function leaks memory addresses of underlying PyObject, which is used to easily defat Address-Space Layout Randomization
+  - Importing `ctypes`, which gets used a lot, results in mapping 4K of memory in RWX. 
+    - "but in theory it should be possible if you have an arbitrary-read exploit primitive. "
+  - Eventually crafted an exploit (not an exploit writer)
+    - Overflowed the numpy array. 
+    - The primitive is used to write the address of system to fwrites GOT/PLT entry.
+    - `print` calls `fwrite`, so now `print '/bin/sh'` launches a shell.
+  - Lots of core Python modules are wrappers to C.
+  - Memory corruption bugs are popular in these modules, and not reported with CVEs, or any responsible security mentions in release notes.
+  - "If you want to run untrusted code of any kind, invest the effort in building a secure OS and network architecture to sandbox it."
 * DONE [[https://tonyarcieri.com/it-s-time-for-a-memory-safety-intervention][It's time for a memory safety intervention]]           :security:memory:
   CLOSED: [2017-03-29 Wed 00:30]
  
