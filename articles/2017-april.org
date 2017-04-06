@@ -3,6 +3,20 @@
 * TODO [[https://pingcap.github.io/blog/2016/10/17/how-we-build-tidb/][How We Build TiDB]]                                         :db:distsys:
 * TODO [[https://medium.com/@MaartenSikkema/using-dotnet-core-orleans-redux-and-websockets-to-build-a-scalable-realtime-back-end-cd0b65ec6b4d][Building a realtime server backend using the Orleans Actor system, Dotnet Core and Server-side Redux]] :realtime:orleans:
 
+* DONE [[http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis][Solving the Water Jug Problem from Die Hard 3 with TLA+ and Hypothesis]] :tla:propertybasedtesting:
+  CLOSED: [2017-04-06 Thu 13:34]
+  - Problem: Using only a 3 gallon jug and a 5 gallon jug, get me exactly 4 gallons of water.
+  - There's a [[https://github.com/tlaplus/Examples/blob/master/specifications/DieHard/DieHard.tla][TLA+ spec]] for this already, but can it be solved with Hypothesis, the Python property based testing lib?
+    - The answer is, yes. But, I'm not, and the author isn't sure if TLA+ / Hypothesis are equal in power. My guess is not, but maybe?
+  - Exploits RuleBasedStateMachine to create Step Functions
+    - and uses invariants that must be satisified
+      e.g. small jug is between 0 and 3 gallons, big between 0 and 5
+           big != 4.
+    - THEN, then the invariant of big != 4 is *invalidated*, e.g. we have exactly 4 gallons, the test fails, and Hypothesis
+      tells you the steps! 
+    - This is almost exactly the opposite of what TLA+s' model checker does, but works almost exactly the same!
+
+
 * DONE [[https://artkond.com/2017/03/23/pivoting-guide/][A Red Teamer's guide to pivoting]]                 :security:pentesting:
   CLOSED: [2017-04-03 Mon 23:22]
   - You've found an RCE in a web-app accessible from the internet, and have a shell.

@@ -32,7 +32,6 @@
   - "The unfortunate answer is the whole apparatus of modern computing is built on a foundation that is fundamentally unsafe, and when we heap praise on iOS it’s only because it’s slightly less terrible than everything else."
   - We need to collectively admit memory safety is a problem.
 
-
 * DONE [[https://blog.jessfraz.com/post/containers-zones-jails-vms/][Setting the Record Straight: containers vs. Zones vs. Jails vs. VMs]] :containers:security:jails:zones:
   CLOSED: [2017-03-28 Tue 10:13]
   - Zones, Jails are first class concepts.
