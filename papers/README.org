@@ -11,6 +11,7 @@
 * TODO [[http://www.bailis.org/papers/acidrain-sigmod2017.pdf][ACIDRain: Concurrency-Related Attacks on Database-Backed Web Applications]] :concurrency:sec:distsys:
 * TODO [[http://dsrg.pdos.csail.mit.edu/papers/][Papers distsys]]                                           :unorganized:
 * TODO http://noisycode.com/blog/2015/02/28/cluster-reading-list/ :unorganized:
+* TODO An industrial Case: Pitfalls and Benefits of Applying Formal Methods to the Development of a Network Centric RTOS
 
 * DONE [[./use-of-formal-methods-at-aws.org][Use for Formal Methods at AWS]]                                 :formal:
   CLOSED: [2017-03-28 Tue 00:28]
