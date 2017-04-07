@@ -1,5 +1,27 @@
 #+TITLE: April 2017 Articles
 
+* TODO [[https://charity.wtf/2016/05/31/operational-best-practices-serverless/][Operational Best Practices #serverless]]          :operations:practices:
+* DONE [[https://charity.wtf/2016/05/31/wtf-is-operations-serverless/][WTF is Operations? #serverless]]                            :operations:
+  CLOSED: [2017-04-07 Fri 16:55]
+  - What is operations?
+    - constellation of org's tech skills, practices, cultural values around
+      designing, building, maintaining systems, shipping, and solving problems
+      with technology.
+    - Ops teams aren't the sole keeper of reliability.
+    - "Thinking about operational quality in terms of “a thing some other team is responsible for” is just generally not associated with great outcomes."
+  - Core competencies of good ops engineers
+    1. Scalability
+    2. Resiliency
+    3. Availability
+    4. Maintainability
+    5. Simplicity in complex systems
+    6. Instrumentation and visibility
+    7. Graceful degradation
+  - Ops, historically speaking, attracted greater proportion
+  - The BOFH stereotype is dead.  
+  - "Some of the most creative cultural and technical changes in the technical landscape are being driven by the teams most identified with operations and developer tooling."
+  - "You don’t make operational outcomes magically better by renaming the team “DevOps” or “SRE” or anything else."
+
 * TODO [[https://pingcap.github.io/blog/2016/10/17/how-we-build-tidb/][How We Build TiDB]]                                         :db:distsys:
 * TODO [[https://medium.com/@MaartenSikkema/using-dotnet-core-orleans-redux-and-websockets-to-build-a-scalable-realtime-back-end-cd0b65ec6b4d][Building a realtime server backend using the Orleans Actor system, Dotnet Core and Server-side Redux]] :realtime:orleans:
 

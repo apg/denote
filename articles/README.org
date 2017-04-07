@@ -1,6 +1,5 @@
 #+TITLE: Articles to Read at some point.
 
-* TODO [[https://charity.wtf/2016/05/31/wtf-is-operations-serverless/][WTF is Operations? #serverless]]                            :operations:
 * TODO [[http://brooker.co.za/blog/2013/01/20/two-phase.htmlExploring][TLA+ with two-phase commit]]                        :tla:distsys:formal:
 * TODO [[https://www.speedshop.co/2015/07/29/scaling-ruby-apps-to-1000-rpm.html][Scaling Ruby Apps to 1000 Requests per Minute - A Beginner's Guide]]
 * TODO [[http://pub.gajendra.net/2016/03/time_series][Simple Time Series Analysis]]
