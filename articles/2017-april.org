@@ -1,5 +1,115 @@
 #+TITLE: April 2017 Articles
 
+* TODO [[http://phrack.org/issues/60/10.html][Basic Integer Overflows]]                                       :secdev:
+* TODO [[https://crypto.stanford.edu/cs155/papers/formatstring-1.2.pdf][Exploiting Format String Vulnerabilities]]             :secdev:format:c:
+* TODO [[http://insecure.org/stf/smashstack.html][Smashing the stack for Fun and Profit]]          :secdev:classic:buffer:
+* TODO [[https://arstechnica.com/security/2015/08/how-security-flaws-work-the-buffer-overflow/][How security flaws work: The Buffer Overflow]]           :secdev:buffer:
+* DONE [[https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml][Common Vulnerabilities in C]]                                 :secdev:c:
+  CLOSED: [2017-04-10 Mon 00:36]
+  - =gets= does not check buffer length (duh)
+    - Use fgets and *dynamic* memory. 
+  - =strcpy= just don't use it, or it's family of functions, e.g strcat
+    - Prefer strlcpy if it's available.
+      #+begin_src
+      #include <stdio.h>
+ 
+      // snprintf with %s guarantees \0 termination
+      #ifndef strlcpy
+      #define strlcpy(dst,src,sz) snprintf((dst), (sz), "%s", (src))
+      #endif
+ 
+      enum { BUFFER_SIZE = 10 };
+ 
+      int main() {
+        char dst[BUFFER_SIZE];
+        char src[] = "abcdefghijk";
+ 
+        int buffer_length = strlcpy(dst, src, BUFFER_SIZE);
+ 
+        if (buffer_length >= BUFFER_SIZE) {
+           printf external link("String too long: %d (%d expected)\n",
+                buffer_length, BUFFER_SIZE-1);
+         }
+ 
+         printf external link("String copied: %s\n", dst);
+ 
+        return 0;
+      }
+      #+end_src
+   - Can use =strncpy=, but less convenient as it doesn't do \0 termination.
+   - Don't use sprintf. Prefer snprintf
+   - For printf family. ALWAYS hardcode the format string.
+   - Opening files
+     - Symbolic link attack
+       - Potential race between checking if file exists, and call to `fopen` 
+          #+begin_src
+          #include <stdio.h>
+          #include <stdlib.h>
+          #include <unistd.h>
+           
+          #define MY_TMP_FILE "/tmp/file.tmp"
+           
+           
+          int main(int argc, char* argv[])
+          {
+              FILE * f;
+              if (!access(MY_TMP_FILE, F_OK)) {
+                  printf external link("File exists!\n");
+                  return EXIT_FAILURE;
+              }
+              /* At this point the attacker creates a symlink from /tmp/file.tmp to /etc/passwd */
+              tmpFile = fopen(MY_TMP_FILE, "w");
+           
+              if (tmpFile == NULL) {
+                  return EXIT_FAILURE;
+              }
+           
+              fputs("Some text...\n", tmpFile);
+           
+              fclose(tmpFile);
+              /* You successfully overwrote /etc/passwd (at least if you ran this as root) */
+           
+              return EXIT_SUCCESS;
+          }
+          #+end_src
+        - Mitigation: Avoid race by accessing directly the file, and don't overwrite if it already exists
+          #+begin_src
+          #include <unistd.h>
+          #include <stdio.h>
+          #include <fcntl.h>
+          #include <stdlib.h>
+           
+          #define MY_TMP_FILE "/tmp/file.tmp"
+           
+          enum { FILE_MODE = 0600 };
+           
+          int main(int argc, char* argv[])
+          {
+              int fd;
+              FILE* f;
+           
+              /* Remove possible symlinks */
+              unlink(MY_TMP_FILE);
+              /* Open, but fail if someone raced us and restored the symlink (secure version of fopen(path, "w") */
+              fd = open(MY_TMP_FILE, O_WRONLY|O_CREAT|O_EXCL, FILE_MODE);
+              if (fd == -1) {
+                  perror("Failed to open the file");
+                  return EXIT_FAILURE;
+              }
+              /* Get a FILE*, as they are easier and more efficient than plan file descriptors */
+              f = fdopen(fd, "w");
+              if (f == NULL) {
+                  perror("Failed to associate file descriptor with a stream");
+                  return EXIT_FAILURE;
+              }
+              fprintf(f, "Hello, world\n");
+              fclose(f);
+              /* fd is already closed by fclose()!!! */
+              return EXIT_SUCCESS;
+          }
+          #+end_src
+    
+   
 * TODO [[https://zinascii.com/2014/a-posix-queue-implementation.html][A POSIX Queue Implementation]]                        :unix:posix:queue:
 * TODO [[https://charity.wtf/2016/05/31/operational-best-practices-serverless/][Operational Best Practices #serverless]]          :operations:practices:
 * DONE [[https://charity.wtf/2016/05/31/wtf-is-operations-serverless/][WTF is Operations? #serverless]]                            :operations:
