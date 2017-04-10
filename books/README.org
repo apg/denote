@@ -1,5 +1,6 @@
 #+TITLE: Books
 
+* TODO [[https://arstechnica.com/security/2015/08/how-security-flaws-work-the-buffer-overflow/][The PC ASM Book]]                                             :free:asm:
 * TODO [[https://en.wikipedia.org/wiki/The_Black_Swan_(Taleb_book)][The Black Swan]]                                           :probability:
 * TODO [[http://book.mixu.net/distsys/][Distributed systems for fun and profit]]                  :distsys:have:
   - I've read this before, but re-read.

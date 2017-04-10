@@ -1,0 +1,117 @@
+#+TITLE: Coursera: Software Security, Low Level Security
+
+* Memory Layout
+  - Virtual addresses, from 0x0 - 0xffffffff (e.g. 4G on 32-bit machine)
+  
+ | Set when starting | 4G                 | cmdline & env           | 0xffffffff           |
+ | Runtime           |                    | Stack                   | int x (local var)    |
+ | Runtime           |                    |                         |                      |
+ | Runtime           | Heap               |                         | malloc(sizeof(long)) |
+ | Compile time      | Uninitialized data | static int x            |                      |
+ | Compile Time      | Initialized data   | static const int y = 10 |                      |
+ | Compile time      | Text               |                         |                      |
+
+  - Stack and heap grow in opposite directions. Stack down, heap up.
+  - Local variables pushed in same order as appear in program
+  - Arguments to function pushed in reverse order.
+  - | local 2 | local 1 | %ebp | %eip| arg1 | arg2 | arg3 | caller's data | 0xfffffff
+    ^                                                     ^
+    X-------------- stack frame --------------------------X
+
+    Local 2 is always 8B before ???s
+  - Push %ebp before locals. Set %ebp to current %esp
+  - Set %ebp to (%ebp) at return
+  - Set %eip to 4(%ebp) at return. And push next %eip before call.
+
+  - Calling function:
+    - Push arguments onto stack (in reverse)
+    - Push the return address (i.e. the address of the instruction to run after return)
+    - Jump to the function's address
+  - Called function:
+    - Push the old frame pointer onto the stack (%ebp)
+    - Set frame pointer (%ebp) to where the end of the stack is right now (%esp)
+    - Push local variables onto the stack
+  - Returning:
+    - Reset previous stack frame: %esp = %ebp, %ebp = (%ebp)
+    - Jump back to return address: %eip = 4(%esp)
+
+* Buffer Overflows
+  
+  #+begin_src
+  void func(char *arg1) 
+  {
+     char buffer[4];
+     strcpy(buffer, arg1);
+     ...
+  }
+  int main() 
+  {
+     char *mystr = "AuthMe!";
+     func(mystr);
+  }
+  #+end_src
+
+  - So, strcpy ends up doing:
+    
+              [ M e ! \0  ]
+    [ A u t h | 4d 65 21 00 | %eip | &arg1 ]
+       buffer 
+    Results in segfault! Cause base pointer is not accessible!
+
+  - But, what if the first local was `int authenticated = 0`?, you overwrote that with that address, and now...
+    `if (authenticated)` passes!
+
+  - Rule: Validate assumptions about user input. Remember that strings come from text input, packets, env vars, file input... 
+
+* Code Injection
+  - Instead of overwriting `authenticated`, run arbitrary code that the %eip (return address points to)
+  - Shell code, if you can do it. Something else otherwise.
+  - Generally can't contain any all 0 bytes, or C string functions won't work.
+
+  #+begin_src
+  // Shell in C.
+  #include <stdio.h>
+  int main() {
+    char *name[2];
+    name[0] = "/bin/sh";
+    name[1] = NULL;
+    execve(name[0], name, NULL);
+  }
+  #+end_src
+
+  - Challenge: Don't know exactly where our code is.
+  - Hijack the saved %eip. If we're wrong, cpu will panic and process crashes
+  - Don't know where return address is if we don't have access to code.
+    - Try lots of different values!
+    - Without ASLR, stack walways starts at same fixed address. Probably didn't grow too deeply.
+  - Can improve our chances by putting a bunch of noops in code, which advance the %eip, and give us greater probability.
+  - So, junk, overwrite base pointer, nop sled, malicious code.
+
+* Other Attacks
+  - Heap Overflow. 
+    - Allocated struct might have a function pointer (or, say, virtual methods in C++ have vtables)
+    - Variants
+      - Overflow into the C++ object vtable (for virtual methods)
+      - Overflow into adjacent objects
+      - Overflow heap metadata
+        - e.g. data just below pointer returned by malloc.
+        - Let malloc do the dirty work by corrupting the heap.
+  - Integer overflow
+    - Exploit overflow of integer to make malloc size *smaller* than expected, and overflow it.
+  - Corrupting data (overflow data)
+    - Modify secret key
+    - Modify state variables (e.g. authenticated)
+    - Modify interpreted strings (e.g. SQL)
+  - Read Overflow (Heartbleed)
+    - Read past end of buffer
+    - This might leak secret info
+  - Stale Memory
+    - Dangling pointer bug occurs when pointer is freed, but program continues to use it.
+    - Can arrange for the freed memory to be reallocated under his control.
+    - Dangling pointer then references the attacker controlled memory, when referenced.
+
+* Format String Vulnerabilities
+  - printf("%d") will simply read what's on the stack, e.g. %ebp.
+  - Don't let the attacker control the format string
+  - %n *writes* the number of bytes written so far *into* the pointed to stack entry. 
+  - The stack is a buffer of sorts, and %n overflows them.
