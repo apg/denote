@@ -4,6 +4,126 @@
 * TODO [[https://crypto.stanford.edu/cs155/papers/formatstring-1.2.pdf][Exploiting Format String Vulnerabilities]]             :secdev:format:c:
 * TODO [[http://insecure.org/stf/smashstack.html][Smashing the stack for Fun and Profit]]          :secdev:classic:buffer:
 * TODO [[https://arstechnica.com/security/2015/08/how-security-flaws-work-the-buffer-overflow/][How security flaws work: The Buffer Overflow]]           :secdev:buffer:
+
+* DONE [[https://fsharpforfunandprofit.com/posts/property-based-testing-2/][Choosing Properties for property-based testing]] :properties:quickcheck:fscheck:
+  CLOSED: [2017-04-12 Wed 00:13]
+** Categories for properties
+*** Different paths, same destination
+    - Properties based on combining operations in different orders, but get the same result
+      - commutative property of addition, fits here.
+*** There and back again
+    - Properties based on combining and operation with it's inverse, and ending up with the same value.
+      - e.g. deserialize(serialize(X)) == X
+      - add/sub, read/write, setP/getP
+      - not strict inverses, but insert/contains, create/exists work here too
+*** Some things never change
+    - Properties based on an invariant that is preserved after some transormation
+      - e.g. changed order, same elements.
+      - size of collection (map), contents of collection (sort)
+*** The more things change, the more they stay the same
+    - Properties based on idempotence, e.g. don't change if you do the same thing twice.
+      - e.g. distinct(X) == distinct(distinct(X))
+*** Solve a smaller problem first
+    - Based on structural induction. If a large thing can be broken
+      into smaller parts, and some property is true for small, you can
+      often prove for large as well.
+      - e.g. prove that property holds for 2 items, then 3, can infer it holds for four-item list as well
+      - natural for recursive things (lists, trees)
+*** Hard to prove, easy to verify
+    - Finding a route through a maze is tricky, but easy to verify that the solution works.
+      - e.g. prime factorization.
+      - might check that a string tokenizer works by just
+        concatenating all the tokens again to get the exact same
+        starting string.
+*** The test oracle
+    - you often have an alternative version of an algorithm or process
+      that you can use to check results.
+      - e.g. compare brute force, with high-performance optimized one.
+      - result of parallel vs linear, single thread.
+** Putting them to work.
+*** List sort with different paths, same destination.
+    - think of an operation you can do before calling List.sort, and one you can do aftering calling it that should result in same results.
+      - Add one to each element of list, then sort
+      - We sort, then add one to each element of list
+      - Should result in equal ists.
+      - *this doesn't exploit the idea of sortedness*
+    - Take 2:
+      - append min value to *end of list*, then sort
+      - prepend min value to front of lists, then sort.
+      - Should result in equal lists
+      - *But, an implementor could exploit the fact that min value is always the same...*
+    - Take 3: 
+      - negate all values, then sort
+      - sort all values, negate, then reverse
+      - this has no magic numbers, and since List.sort is generic (in F# as the article is written for), List.sort for strings will work just the same.
+*** Different paths, same dest for List.reverse
+    - Can do the append then reverse. reverse then prepend 
+      - Exercise: Is this a good property? Can a malicious programmer pass?
+*** Hard to prove, easy to verify for list sorting
+    - is each adjacent pair <=?
+    - This still fails for empty list though... 
+*** Some things never change
+    - Length of sorted, vs unsorted list stay the same (unless duplicates are removed, of course!)
+      - But this is still not right, because length of [1; 2; 3] == [1; 1; 1]
+    - But a sorted list will be a permutation of the original list, where as [1; 1; 1] is not!
+      - Can't loop through 1000000s of permutations though. 
+      - But, isPermutation is easy to verify.
+    - For sorted, we need isPermutation and adjacent pairs. Just combine them.
+*** Really, you're not going to write bad implementions that satisfy properties just to do so. :keypoint:
+    - Or, you shouldn't. property-based testing is not a testing process, but a *DESIGN* process.
+      - Helps you clarify what the system is *really* trying to do.
+*** Why not test our sort vs. Insertion Sort, which is verified correct already?
+*** Example:
+    - A =Dollar= class stores an =Amount=
+    - Methods =Add= and =Times= transform in the obvious way.
+      - Have inverse property, setter/getter
+      - Have idempotence, set twice == set once
+    - But, if it's an Immutable Dollar... no setters..
+      - Different paths works though:
+        - { Create(x); Times(y) } == Create(x * y)
+        - Oops, don't have Equal! 
+      - And, if we add in Add
+        - { Create(x); Times(Y); Add(z) } == Create(x * y + z)
+** TDD vs property-based testing
+   - PBT have a number of advantages:
+     - more general, and thus less brittle
+     - provide a better and more concise description of requirements than a bunch of examples
+     - as a consequence, one property-based test can replace many, many, example-based tests.
+     - random input often reveals issues that you've over looked
+     - force you to think. and create a clean design.
+
+* DONE [[https://fsharpforfunandprofit.com/posts/property-based-testing/][Introduction to property-based Testing]] :fscheck:properties:quickcheck:
+  CLOSED: [2017-04-11 Tue 23:30]
+  - Suppose you write an add function. And, then two tests 1+2 = 3, and 2 + 2 = 4.
+    - How many tests are enough?
+  - Apparently TDD encourages shitty tests. (See: The Transofmration Priority Premise)
+    - E.g. if x = 1 && y = 2 then return 3
+           if x = 2 && y = 2 then return 4
+  - Better approach than making more examples, is to generate random numbers and make sure they add correctly.
+    - in the case of our add function, assume + operator works correctly.
+    - But, this is problematic. 
+  - If you can't use "+", how do you test? Use *properties* of the function.
+    - Think about how add differs from other similar functions (e.g. subtract)
+      - Does the order matter? 
+  - "When I add two numbers, the result should *not* depend on parameter order"
+    - result1 = add x y; result2 = add y x; assert result1 == result2
+  - Next property could be x * 2 == add x x, but that assumes presence of multiplication.
+  - Can maybe call the function twice and see the effects.
+    -  (add 1 (add 1 0)) == add 2
+  - Is there a *trivial* property of our function that we know the answer to without reimplementing?
+    - Yes. Add 0 to any number, and get any number. 
+** Specification by Properties
+   - A collection of these properties is a specification
+   - Unit tests, and functional tests have been a stand in for a specification. 
+     - These tests often use "magic" data.
+   - This doesn't just work for math functions, can work for everything
+   - Not *every* business requirement can be specified this way.
+** Other things:
+   - Generators: A random input generator specific to a type
+   - Shrinking: creating minimum counter examples
+     - Generates a sequence of random inputs, starting small, and getting bigger
+     - If any inputs cause property to fail.. shirnk the first parameter to find a smaller number that also fails...
+
 * DONE [[https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml][Common Vulnerabilities in C]]                                 :secdev:c:
   CLOSED: [2017-04-10 Mon 00:36]
   - =gets= does not check buffer length (duh)
