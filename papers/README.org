@@ -16,3 +16,5 @@
 
 * DONE [[./use-of-formal-methods-at-aws.org][Use for Formal Methods at AWS]]                                 :formal:
   CLOSED: [2017-03-28 Tue 00:28]
+* DONE [[./scuba-diving-into-data.org][Scuba: diving into Data at Facebook]]               :distsys:operations:
+  CLOSED: [2017-05-01 Mon 17:21]

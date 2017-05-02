@@ -1,0 +1,140 @@
+#+TITLE: Scuba: Diving into Data at Facebook
+
+* Introduction
+  - Want flexibility and speed in querying data to diagnose issues quickly
+  - Originally relied on pre-aggregated graphs and carefully managed MySQL cluster of performance data.
+  - Scuba is on hundreds of servers with 144GB of RAM. 
+  - Compressed data with 1000 tables. 70TB.
+  - Data partitioned randomly across all servers.
+  - Ingests millions of rows a second.
+  - Rows specify sample rate.
+  - SQL query like interface, can produce pie charts, time series, distributions of column, values, and a dozen other visualizations.
+* Use Cases
+** Performance Monitoring
+   - "starts by looking at a dashboard of tens of graphs showing CPU load on servers,cache hits/misses, network throughput"
+   - Compared week / week. Before and after a big code change.
+     - Can then drill down through different columns (even including stack traces), refiniing the query quickly, with results just as quick.
+   - Data is no more than seconds old.
+   - Contains samples of 1 in 10,000 events (though this varies by dataset).
+    
+** Trend Analysis
+   - "Eric looks for trends in data content"
+   - Extracts sets of words from user posts and looks for spikes in word frequencies across many dimensions: country, age, gender.
+   - Answers "how many posts mention current phrases?"
+   - Writes custom javascript functions to calculate statistics about the data.
+
+** Pattern Mining
+   - Bob isn't a software engineer, but in product.
+   - Looks at data across many dimensions without having any idea how it was logged.
+
+* Overview
+** Data model
+   - Integers, timestamps. used in aggs, comps and grouping.
+   - Strings: used for comparisons and grouping
+   - Sets of Strings: represent words in facebook post, or set of features.
+   - Vectors of strings: ordered, mostly for stack traces.
+   - No floats. Recommendation of storing, e.g. trunc(X * 10^5)
+     - mostly due to aggregation leading to errors in accuracy
+   - Every row has a timestamp
+   - Arbitrary columns containing arbitrary types.
+   - All tables contain ints and strings. Only some sets and vectors of strings.
+** Data layout
+   - Integers represented naturally using N bytes - 1 bit are directly encoded using N bytes.
+   - Dictionary encoding means each string stored once, and an integer stored in the row.
+   - Strings are compressed or uncompressed depending on cardinality.
+   - For Compressed string columns, each index is stored using the number of bits necessary to represent maximum index.
+   - Uncompressed columns store raw string and it's length.
+   - Sets of strings indexes are sorted and delta encoded and then each index is Fibonacci encoded (uses a variable number of bits)
+   - Stored consecutively in the row.
+   - Vectors store a 2 byte count of strings, and 1 byte size for the number of bits in the maximum dictionary index. Index stored consecutively in the row using size number of bits.
+   - Dictionaries are local the the leaf, and separate for each column.
+   - Table stored in row order.
+     - Suggests that column oriented storage is probably better for cache locality.
+   - No create table statement. Created on demand.
+   - Table rows may be sparsely populated.
+** Data ingestion, distribution and lifetime
+   - After sampling, log entires are written to Scribe.
+   - tailer process then subscribes to scribe categories and sends batches of rows to Scuba over it's thrift api.
+   - For each batch, scuba chooses 2 leaves at random and sends the batch to the left with more free memory.
+   - The rows for each table thus end up partitioned randomly across all leaves in the cluster.
+   - No indexes.
+   - Leafs store gzip compressed copies of the batch to disk for persistence.
+     - Then reads data, compresses the column, and adds the row to the table in memory.
+   - MEMORY is the scarce resource.
+   - Delete old data at the same rate they receive it.
+     Because of:
+     - Age (timestamp too old)
+     - Space (table exceeded space limit)
+** Query Model
+   - Web interface does form based queries
+   - SQL, or Thrift interfaces:
+     - SELECT column, column, ...
+          aggregate(column), aggregate(column),...
+       FROM table
+       WHERE time >= min-timestamp
+         AND time <= max-timestamp
+        [AND condition ...]
+       GROUP BY column, column, ...
+       ORDER BY aggregate(column)
+       LIMIT number
+   - Aggregates: count, min, max, sum, average.
+     - sum/minute, percentiles, and histograms.
+   - WHERE must contain a time range.
+   - 100,000 default limit.
+   - GROUP BY and ORDER BY are optional.
+   - SETs can do any/all/none, isempty.
+   - Strings support regex.
+   - Vector column, any/all/none/start/end/within of string-list. string-list order is significant.
+   - No joins.
+     - When necessary, it's done *before* hand.
+** Query Executation
+   1. client locates one root aggregators (RA; there are many) and sends query.
+     - validates, parses here.
+   2. root aggregator identifies 4 other machines to act as intermediate aggregators (IA)
+     - fanout of 5.
+     - RA Replaces every average function with sum and count.
+     - Sends new query to all IAs
+   3. IAs create further fanouts and propagate query until (only) leaf aggregator (LA) on each machine receives the query.
+   4. LA sends the query to each Leaf Server on the machine to process in parallel.
+   5. LA collects results and aggregates them.
+      - Applies sorting
+      - Applies limit as max(5 * limit, 100)
+   6. IAs consolidate the LA results, doing merge step on sort
+   7. RA computes final result, including averages and/or percentiles. Applies final sorting and limit constraints.
+   8. RA returns result, within a few hundred ms.
+   - Leaf Servers may contain 0 or more partitions.
+   - small or new tables may be stored on only a few or a few hundred leaves out of the 1000s of leaves in the cluster.
+   - Leaf Servers scan every partition of the table with overlapping time range.
+   - LS optimize regexes
+   - Aggressive timeout window of, say, 10ms for each leaf server, aggregator.
+   - Works fine because sample rate is known.
+     - Maintains and checks an independent service for the count of rows expected per table per query.
+     - Uses this to calculate percentage of missing data. If 99.5% or less, scuba prints a warning.
+   - Multiple leaf servers run per machine. One aggregator server runs on each physical.
+   - Aggregation fanout of 5 produced best response times emperically.
+     - Independent study of aggregation trees, showed 5 to be good, empiracally, too.
+* Experimental Evaluation
+** Setup
+   - Xeon E5-2660 2.20 Ghz, with 144 GB of memory. 160 machines across 4 racks. 10G ethernet. CentOS 5.2
+   - Vary number of machines used from 10 to 160 
+   - 8 leaf nodes per machine and 1 agregator. Aggregator always serves as Leaf, but can be IA and RA, too.
+   - Leafs are 1GB
+** Single client experiments
+   - Leaf scan time proportional to amount of data.
+   - Aggregation cost is independent of data at each leaf.
+     Function of quey and cluster size.
+   - Aggregation cost grows logarithmically with Number of machines.
+** Multi Client experiments
+   - 1 to 32 parallel clients.
+   - 200 consecutive queries with no time between.
+   - Throughput *rises* as the number of clients increases.
+     - until CPUs at leaves are saturated.
+     - Throughput flattens after 8 clients.
+* Conclusion
+  - Scuba prunes data as fast as it ingests it
+  - Expects many tables will contain sampled data
+  - Data import is as simple as inserting a loggiing call.
+  - table can contains rows with different schemas.
+  - Visualization is super important
+  - Comparison queries, that differen only in their time range or condition value are amazing when displayed together, with maybe a percentage change in a table.
+  - Best effort availability for queries works well for this case.
