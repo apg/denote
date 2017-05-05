@@ -1,10 +1,5 @@
 #+TITLE: April 2017 Articles
 
-* TODO [[http://phrack.org/issues/60/10.html][Basic Integer Overflows]]                                       :secdev:
-* TODO [[https://crypto.stanford.edu/cs155/papers/formatstring-1.2.pdf][Exploiting Format String Vulnerabilities]]             :secdev:format:c:
-* TODO [[http://insecure.org/stf/smashstack.html][Smashing the stack for Fun and Profit]]          :secdev:classic:buffer:
-* TODO [[https://arstechnica.com/security/2015/08/how-security-flaws-work-the-buffer-overflow/][How security flaws work: The Buffer Overflow]]           :secdev:buffer:
-
 * DONE [[https://fsharpforfunandprofit.com/posts/property-based-testing-2/][Choosing Properties for property-based testing]] :properties:quickcheck:fscheck:
   CLOSED: [2017-04-12 Wed 00:13]
 ** Categories for properties
@@ -229,9 +224,6 @@
           }
           #+end_src
     
-   
-* TODO [[https://zinascii.com/2014/a-posix-queue-implementation.html][A POSIX Queue Implementation]]                        :unix:posix:queue:
-* TODO [[https://charity.wtf/2016/05/31/operational-best-practices-serverless/][Operational Best Practices #serverless]]          :operations:practices:
 * DONE [[https://charity.wtf/2016/05/31/wtf-is-operations-serverless/][WTF is Operations? #serverless]]                            :operations:
   CLOSED: [2017-04-07 Fri 16:55]
   - What is operations?
@@ -253,9 +245,6 @@
   - "Some of the most creative cultural and technical changes in the technical landscape are being driven by the teams most identified with operations and developer tooling."
   - "You don’t make operational outcomes magically better by renaming the team “DevOps” or “SRE” or anything else."
 
-* TODO [[https://pingcap.github.io/blog/2016/10/17/how-we-build-tidb/][How We Build TiDB]]                                         :db:distsys:
-* TODO [[https://medium.com/@MaartenSikkema/using-dotnet-core-orleans-redux-and-websockets-to-build-a-scalable-realtime-back-end-cd0b65ec6b4d][Building a realtime server backend using the Orleans Actor system, Dotnet Core and Server-side Redux]] :realtime:orleans:
-
 * DONE [[http://nchammas.com/writing/how-not-to-die-hard-with-hypothesis][Solving the Water Jug Problem from Die Hard 3 with TLA+ and Hypothesis]] :tla:propertybasedtesting:
   CLOSED: [2017-04-06 Thu 13:34]
   - Problem: Using only a 3 gallon jug and a 5 gallon jug, get me exactly 4 gallons of water.
@@ -268,7 +257,6 @@
     - THEN, then the invariant of big != 4 is *invalidated*, e.g. we have exactly 4 gallons, the test fails, and Hypothesis
       tells you the steps! 
     - This is almost exactly the opposite of what TLA+s' model checker does, but works almost exactly the same!
-
 
 * DONE [[https://artkond.com/2017/03/23/pivoting-guide/][A Red Teamer's guide to pivoting]]                 :security:pentesting:
   CLOSED: [2017-04-03 Mon 23:22]

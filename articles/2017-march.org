@@ -124,3 +124,5 @@ Peter Bourgon
 *** Due to Tracing request scope, not all metrics or logs, for example, can be shoehorned into a tracing system
 *** Shoehorning metrics into a logging pipeline may force us to abandon some advantages of a flexible query language to explore them.
     - (Not sure I agree, see splunk. But maybe)
+* DONE [[./2017-march.org][The Saddest Moment]]
+  CLOSED: [2017-03-27 Mon 23:34]
