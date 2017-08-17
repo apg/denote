@@ -1,6 +1,6 @@
 #+TITLE: Use of Formal Methods at Amazon Web Services
 
-Source: [[http://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf][Use for Formal Methods at AWS]]
+Source: [[./files/formal-methods-amazon.pdf][Use for Formal Methods at AWS]]
 Chris Newcombe, Tim Rath, Fan Zhang, Bogdan Munteanu, Marc Brooker, Michael Deardeuff
 
 * Formal specification in use at AWS since 2011 to help solve difficult design problems in critical systems.

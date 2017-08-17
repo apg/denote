@@ -1,5 +1,8 @@
 #+TITLE: Scuba: Diving into Data at Facebook
 
+Source: [[./files/scuba-p767-wiener.pdf][Scuba: Diving into Data at Facebook]]
+Lior Abraham, John Allen, Oleksandr Barykin, Vinayak Borkar, Bhuwan Chopra, Ciprian Gerea, Daniel Merl, Josh Metzler, David Reiss, Subbu Subramanian, Janet L. Wiener, Okay Zed
+
 * Introduction
   - Want flexibility and speed in querying data to diagnose issues quickly
   - Originally relied on pre-aggregated graphs and carefully managed MySQL cluster of performance data.
