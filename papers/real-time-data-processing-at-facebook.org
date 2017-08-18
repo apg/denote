@@ -1,0 +1,174 @@
+#+TITLE: Realtime Data Processing at Facebook
+
+Source: [[./files/realtime-data-processing-at-facebook.pdf][Realtime Data Processing at Facebook]]
+ACM SIGMOD 2016
+Guoqiang Jerry Chen, Janet Wiener, Shridhar Iyer, Anshul Jaiswal, Ran Lei, Nikhil Simha, Wei Wang, Kevin Wilfong, Tim Williamson, Serhat Yilmaz
+
+* Introduction
+  - Qualities of a realtime data system
+    * Ease of use: SQL? Compiled C++ jobs?
+    * Performance: How much latency / throughput do we need?
+    * Fault-tolerance: guarantees / semantics? 
+    * Scalability: Can you reprocess data? Work in parallel? change the volume ok?
+    * Correctness: Do we need ACID guarantees? All data in results at once?
+  - Their main decision wasthat a few seconds to process 100s of Gbs per second meets their performance requirements.
+  - They run 100s of realtime data pipelines
+  - Use cases
+    * Chorus: aggregated anonymized voice of facebook. Top 5 topics
+    * Mobile analytics pipelines
+    * Page insights: real time information for page owners
+    * Realtime streaming pipelines to shed resources from other busy services
+* Systems Overview
+** Scribe
+   - Distributed, persistent messaging system.
+   - Few seconds latency and high throughput.
+   - Batch and realtime ingestion.  
+   - Data organized by category.
+   - Stores data in buckets on HDFS. Buckets are the basic processing unit.
+** Puma
+   - Stream processing system with SQL and UDF interfaces. UDFS in Java.
+   - Can provide pre-computed query results for simple aggregation queries
+   - Delayed by query results time window (makes sense)
+   - Also servces as filtering and processing of scribe streams (few seconds delay)
+     * Output as another scribe stream.
+   - Optimized for compiled queries, not ad-hoc.
+** Swift
+   - Basic stream processing engine, providing checkpointing for scribe.
+     * Read from scribe, checkpointing every N strings, or B bytes.
+   - Most applications written in Python or scripting langs. Best for lower throughput.
+** Stylus
+   - Lowlevel stream processing in C++.
+   - Input as scribe stream, output scribe, or data store.
+   - Processors can be stateful, or stateless.
+   - Processors can combine into DAGs
+   - Handles imperfect ordering, but requires the application writer to identify the event time data in the stream.
+     - Can provide a function to estimate the event time low watermark with a given confidence interval.
+** Laser
+   - High throughput, low latency key-value store on top of RocksDB.
+   - Can make the output of a puma or stylus app available to applications.
+   - Can also make result of Hive Query or Scribe stream avail to Puma or Stylus app, for a lookup join, etc.
+** Scuba
+   - Slice and dice analytics tool
+   - Millions of events per second into thousands of tables.
+   - Low latency distribute queries based on aggressive timeouts, in memory storage, and heavy sampling.
+   - Ad hoc queries
+** Hive data warehouse
+   - exabyte scale.
+   - Half from scribe, half from daily query ETL type stuff
+   - Presto for SQL like queries over it all
+* Example Application
+  - Introduces a sample app that does a top 5 style processing
+  - Disjoint partitions working in parallel
+  - data has event type, dimension id, and text
+  - Roughly
+    -> scribe -> [FILTERER] -> scribe [JOINER (dimension lookup, classifications, over RPC)] -> scribe -> SCORER -> scribe -> [RANKER (which gets queried)]
+  - Fitlerer and joiner are stateless, where as Scorer and ranker are stateful
+* Design Decisions
+** Language paradigm
+   - Choices (Options)
+     * Declarative (SQL)
+     * Functional 
+     * Procedural
+   - At Facebook
+     * No single language that fits all use cases
+     * Have 3 different stream processing systems as a result of previous fact.
+     * Puma uses SQL
+     * Swift, Python
+     * Stylus, C++
+** Data transfer
+   - Choices
+     * Direct Message transfer: e.g. RPC. Choice of MillWheel, Flink, SparkStreaming. Storm uses ZeroMQ
+     * Broker Message Transfer
+     * Persistent storage (e.g. Kafka): Most reliable. Has multiplexing. Allows multiple applications to process at different times, etc.
+   -  At Facebook
+     * Use Scribe -- persistent message bus, to connect processing nodes.
+       * Meets the seconds requirement for real-time.
+       * Limitation that it writes to disk, but reads are typically cached, since you look at recent data.
+       * Requires additional hardware and network bandwidth. But, gets you:
+         - fault tolerance
+           1. Independene of stream processing node failures
+           2. Recovery from failure because you only replace the failed node
+           3. Automatic multiplexing, allows for running duplicate downstream nodes.
+         - ease of use
+           1. Debugging is easier: Can reply the same streams.
+           2. Monitoring and alerting can be done simply by delays in streams from the persistent store
+           3. More flexibility on writing applications, since components can be connected easily
+         - scalability
+           1. Scale number of partitions by changing bucket number in scribe category in a config file.
+         - performance:
+           1. If one proc. node is slow, the speed of the previous node not affected. (in the DAG case)
+           2. Can simply move jobs to new nodes when nodes are overloaded.
+           3. In tightly coupled system, backpressure is propgated upstream, so DAG throughput based on slowest node.
+** Processing Semantics
+   - Choices
+     - A stream processor does 3 types of activities
+       1. Process input events
+       2. Generate output
+       3. Save checkpoints   
+     - Implemntation of those 3 activities, controlls the processors semantics.
+       * State semantics: can each input event count at-least-once, at-most-once, or exactly-once?
+       * Output semantics: can a given output event show up in the stream at-least-ocne, at-most-once, or exactly-once?
+     - Stateless processors only have output semantics. Stateful have both kinds.
+     - The different semantics depend only on the order of saving the offset and in-memory state. State semantics:
+       1. At-least-once semantics: Save the in-memory state first, then save the offset.
+       2. At-most-once: Save the offset first, then save the in-memory state
+       3. Exactly-once: Save the in-memory state and the offset atomically, e.g. in a transaction.
+     - Output
+       1. At-least-once: Emit output to output stream, then save checkpoint of offset and in-memory state
+       2. At-most-once: Save checkpoint of the offset and in-memory state, then emit output
+       3. Exactly-once: Save checkpoint of offset, and in-memory state and emit output values, atomically in transaction.
+  - At Facebook
+    - Differing applications have different reqs.
+    - In the example, outputting twice isn't an issue, at-least-once output works fine.
+    - For scuba, ingress is stateless, only output semantics necessary. But, at-most-once output are best choice to avoid duplicated data being queried
+    - Even data delivered to dist databases like HBAse or ZippyDB (????) will have people choosince at-most-once or at-least-once output semantics, since trasactions not readily available
+** State Saving mechanisms
+   - Choices
+     * Replication: stateful nodes are just replicated, requiring double the hardware.
+     * Local database persistence: Systems like samza store the state to local disk before writing mutation to kafka.
+       - After failure, the local state is recovered from the Kafka log.
+       - Samza can't support exactly-once because of this, since Kafka doesn't support transactions.
+     * Remote database
+       - MillWheel does this, and can support exactly-once state and output semantics.
+     * Upstream backup
+       - replayed from upstream on failure
+     * Global consistent snapshot
+       - Flink uses distributed snapshot. After failure, multiple amchines must be restored to the consistent state.
+   - At facebook
+     * Multiple choices, because of different applications
+     * Style supports local database and remote database.
+       - RocksDB for local.
+     * Monoid processors
+       - Apply mutations to an empty state, and merge all the partial states. e.g. read-write-merge.
+       - Read-write-modify is optimized to an append-only pattern.
+     * Aggregations in Puma are all monoid processors.
+     * Stylus: a user application declares they are monoid.
+** Reprocess
+   - Need for reprocessing arrises when new applications get setup, or for testing, or a new metrics, or a bug in existing processing.
+   - Choices
+     * Stream only: Only retain the scribe streams.
+     * Maintain two separate systems: one for batch and one for stream.
+     * Make your stream processing run in batch environments.
+       - Spark streaming and flink are examples of this, which is the approach that's taken
+   - At Facebook
+     * Scribe doesn't do infinite retention. Store input and output in Hive for longer retention.
+     * Reprocess data using MapReduce to rerun stream processing applications in the batch environment
+     * Stylus applications generate a batch binary and a stream binary at the same time (!!!!)
+       - Batch binary for monoid processors can do some work in Mapper phase.
+* Lessons
+  - Multiple systems let us "move fast"
+    * No system is right for all use cases.
+  - Ease of debugging
+    * Persistent scribe streams mean you can replay, which makes iterative development easier
+  - Ease of deployment
+    * various optimizations to make all this not horrible
+  - Ease of monitoring and operation
+    * Monitor processing lag.
+  - Streaming v. Batch
+    * Not an either/or decision. 
+    * Originally all batch
+    * Streaming only systems *can* be authoritative with the write semantics.
+
+
+
+

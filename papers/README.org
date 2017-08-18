@@ -14,6 +14,7 @@
 * TODO http://noisycode.com/blog/2015/02/28/cluster-reading-list/ :unorganized:
 * TODO An industrial Case: Pitfalls and Benefits of Applying Formal Methods to the Development of a Network Centric RTOS
 
+* DONE [[./realtime-data-processing-at-facebook.org][Realtime Data Processing at Facebook]] :distsys:streamping:realtime:data:
 * DONE [[./use-of-formal-methods-at-aws.org][Use for Formal Methods at AWS]]                                 :formal:
   CLOSED: [2017-03-28 Tue 00:28]
 * DONE [[./scuba-diving-into-data.org][Scuba: diving into Data at Facebook]]               :distsys:operations:
