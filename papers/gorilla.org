@@ -1,0 +1,212 @@
+#+TITLE: Gorilla: A Fast, Scalable, In-Memory Time Series Database
+
+Source: http://www.vldb.org/pvldb/vol8/p1816-teller.pdf, [[./files/gorilla.pdf][pdf]]
+Tuomas Pelkonen, Scott Franklin, Justin Teller, Paul Cavallaro, Qi Huang, Justin Meza, Kaushik Veeraraghavan
+
+* Introduction
+  - Systems are growing larger and larger. Need to monitor them.
+  - Facebook uses a TSDB to store system measuring data points and provides quick query functionalities on top.
+  - *Writes Dominate*: Needs to be available as a primary concern.
+    - Might exceed 10s of millions of data points each second.
+    - Read rate couple of magnitudes less. Primarily from automated systems.
+  - *State Transitions*: Wish to identify issues that emerge from new software releases.
+    - Wish for fine-grained aggregations over short-time windows.
+    - The ability to display state-transitions within tens of seconds ideal.
+  - *High Availability*: Should write to local TSDB in data center partition
+  - *Fault Tolerance*: Wish to replicate all writes to multiple regions.
+  - Gorilla satisfies all these constraints, and functions as a write-through cache of most recent data entering the monitoring system.
+  - Queries aimed to run in 10s of milliseconds.
+  - Not user facing, no acid required
+  - Must accept high percentage of writes, though some can fail.
+  - Most recent data is much more important.
+  - 1 trillion points per day. 
+  - That's 16TB at 16bytes per point.
+  - *They repurpose an existing XOR based floating point compression scheme to work in a streaming manner that allows compression to an average of 1.37 bytes per point, a 12x reduction in size!*
+
+* Background and Requirements
+** Operational Data Store (ODS)
+   - Monitoring solution at FB comprised of TSDB, query service, and detection and alerting system.
+   - Two consumers: 
+     - Graphers (interactive users)
+     - Automated alerting system
+       - Comparse data to preset thresholds for health, performance and aignostic metrics -- firing breaches to on-call engineers
+*** Monitoring system read performance issues
+    - Realized in 2013 that HBase as TSDB couldn't scale to handle future read loads.
+    - 90th percentile increased to multiple seconds blocking our automation
+    - Users were self-censoring to avoid slow execution times.
+    - Quickly rejected flat out rewrite given 2PB of data.
+    - Hive wasn't suitable, either
+      - query latency and efficiency, of which Hive sucks at.
+    - Turned to in-memory caching.
+      - Read through cache would miss the most recent data point.
+      - Considered separate memcache based, write-through cache.
+      - Rejected due to high traffic read/write cycle to memcache.
+*** Requirements
+    - 2 billion uniq TS identified by a string key
+    - 700 million data points (timestamp and value) per minute
+    - 26hr retention
+    - 40,000 qps at peak
+    - Reads in under 1ms
+    - 15 second granularity (4 points per minute per time series)
+    - Two in memory (not colocated replicas)
+    - Always serve reads when single server crashes
+    - Ability to quickly scan over all in memory data
+    - Support 2x growth y over y.
+** Comparison with other TSDB
+   - Gorilla designed from beg. to store all data in memory, it's different from other TSDBs
+   - Could be used as a write through cache to another on-disk TSDB, though.
+*** OpenTSDB
+    - Very close to ODS HBase solution
+    - Have come to similar conclusions for optimization and horiz. scalability.
+    - Does not do time roll up aggregation to save space on older data.
+    - Richer model for identifying series. Uses tags.
+      - Gorilla does a single string.
+*** Whisper (Graphite)
+    - RRD-like database on disk.
+    - Expects data to be timestamped at intervales.
+      - no jitter support
+    - Each TS in separate file
+    - Gorilla works in a similar way given the age out story (e.g. most recent day of data)
+    - Not efficient enough given on-disk nature
+*** InfluxDB
+    - Even richer data model than OpenTSDB
+    - Larger disk usage than schemes that only store the time series data 
+    - Clustering support not interesting as it involves new resources (ODS used HBase, which existing teams knew how to scale)
+    - Disk based queries result in slower queries
+* Gorilla Architecture
+  - in-memory TSDB
+  - functions as a write-through cache
+  - 3-tuple storage (key string, ts 8bytes, value double-float)
+  - Incorporates time series compression, reducing 16-bys to 1.37 bytes on average.
+  - Fast and efficient data scans, while maintaining constant time lookup of individual time series
+  - Key uniquely identifies a TS
+  - Sharded by key
+  - At launch 26 hours of data fit into 1.3TB of RAM on 20 machine. Grew to 80 nodes per cluster.
+  - Shared nothing architecture, focusing on horizontal scalability.
+  - Double writes to two geographical areas. 
+    - Tolerates single node failures, network cuts, and entire data center failures.
+** Timeseries Compression
+   - Existing compression schemes didn't work with double precision floats
+   - Or, only worked on a complete set, not a stream
+   - Also tried some approximations
+   - Focused exclusively on keeping the full resolution representations.
+   - Work inspired by a compression scheme for floating point data derived in scientific computation.
+     - Leveraged XOR comparison with previous values to generate a delta encoding.
+   - Timestamps and values are compressed separately using information about previous values.
+*** Compressing time stamps
+    - Analyzed ODS data. 
+    - Noticed vast majority of data arrive at a fixed interval.
+      - e.g. common for a TS to log every 60s
+    - Store delta of deltas
+      - If delta of time stamps is 60, 60, 59, and 61:
+        the delta of deltas is computed via subtraction: 
+        0, -1, 2.
+    - We next encode the delta of deltas using variable length encoding
+      1. Block header stores the starting time stamp t, aligned on a 2 hour window.
+      2. Subsequent timestamps:
+         a. Calculate delta of deltas D = (Tn - Tn-1) - (Tn-1 - Tn-2)
+         b. If D is zero, store single '0' bit
+         c. If D is between [-63, 64], store '10' followed by the value (7 bits)
+         d. If D is between [-255, 256], store '110' followed by the value (9 bits).
+         e. If D is between [-2047, and 2048], store '1110' followed by the value (12 bits)
+         f. Otherwise store '1111' followed by D using 32bits.
+*** Compressing values
+    - Value is restricted to double precision float.
+    - Compression scheme similar to others in the field for floating point values.
+    - From ODS data, discovered:
+      - most values do not change significantly when compared to it's neighboring data points.
+      - many TS only store integers.
+        - Allows tuning of expensive prediction scheme to simpler
+          implementation that compares the current value to the
+          previous value. If values are close together, the sign,
+          mantissa and exponents will be identical.
+        - Use this to compuse a simple XOR of the current an dprevious values rather than employing a delta encoding.
+        - Then encode those XORs with a variable length encoding scheme:
+          1. First value stored with no compression
+          2. if XOR with previous value is 0, store single '0' bit
+          3. When XOR is non-zero, calculate number of leading and trailing 0s in the XOR and store '1' followed by:
+             a. (Control bit '0') if the block of meaningful bits falls within block of previous meaningful bits, i.e. there are at least as many leading zeros and as many trailing zeros as with the previous value, use that information for the block position and just store the meaningful XORed value.
+             b. (Control bit '1') Store the length of the number of leading zeros in the next 5 bits, then store the length of the meaningful XORed value in the next 6 bits. Finally store the meaningful bits of the XORed value.
+    - About 51% compressed to 1 bit since previous values the same.
+      - 30% compressed with control bits '10', with 26.6 bits on average
+      - 19% with control bits '11', with 36.9 bits. 13 bits of overhead to encode length of leading and meaningful 0 bits.
+    - Uses previous floating point value and previous XORed value, which results in additional compression, because a sequency of XORed values often have a very similar number of leading a trailing zoers.
+    - Ints compress well, because the location of the one bits after the XOR operation is often the same for the whole time series, meaning most have same number of trailing 0s
+    - Timespan for blocks is a tradeoff. At two hours per block, 1.37b per data point, average. But, have to compete with computational resources to encode and decode at higher or lower block sizes.
+*** In-memory data structures
+    - Gorilla uses a Timeseries Map as the primary data structure.
+      - Consistes of a vector of stdlib C++ shared-pointers to time series, and a case sensitive, and case insensitive map for normalizing time series names.
+        - vector provides efficient paged scans through all the data. 
+        - map provides constant time lookup to a particular ts.
+    - Shared pointer usage enables scans to copy the vectors in a few microseconds. 
+    - Tombstoned vector regions.
+    - Concurrency through single read-write spin lock, and a 1 byte spin lock on each time series.
+      - Each time series has relatively low write throughput, so low contention.
+    - ShardMap maps shardID to TSMaps
+    - Maps are about 1 million entries, for which the unordered-map in C++ is sufficient.
+    - A time series data structure is composed of a sequence of "closed blocks" for data older than two hours, and a single open data block that holds the most recent data.
+      - open data is an append-only string, to which compressed time and values are appended.
+      - closed one block is full, and never changed until deleted.
+    - Blocks are slab allocated. Open blocks reallocate, but copying reduces fragmentation in practice.
+    - Data copied directly into result of RPC call. Decompression happens on the client.
+*** On disk structures
+    - Single host failures by storing data in GlusterFS (POSIX compliant, distributed file system), with 3x replication
+      - HDFS should have been fine.
+    - Hosts own multiple shards, and a single directory per shard. 
+      - Directories contain key lists, append-only logs, complete block files, and checkpoint files.
+    - key list maps time series string key to int identifier, which is the index into the in-memory vector.
+    - new keys appended to current key list, and gorilla periodically scans to rewrite the file
+    - Gorilla logs all new data points, and compressed as previously seen. 
+      - One append-only log per shard, so values within a shard are interleaved across time series.
+      - So, a 32-bit integer id is added adding significant storage overhead to the per-shard log file.
+    - No ACID, not a WAL. 
+    - 64kB buffer before being flushed (about 1,2 seconds)
+    - Crash could result in small loss of data.
+    - Every two hours, Gorilla copies the compressed block data to disk. Complete block file for every two hours worth of data.
+      - slabs of data blocks, and a list of <time series id, data block pointer> pairs.
+      - Once block file is complete, gorilla checkpoints and deletes the logs for that relevant data.
+        - on crash, the checkpoint won't exist, so this will be retried.
+*** Handling failures
+    - Handles: single node, temporary failures with zero observable downtime; large scale, and localzed failures (network cut to an entire region)
+    - Can model rolling deploy as controlled single node failures.
+    - Wanted to prioritize recent data, so choose failure handling based on those tradeoffs.
+    - Two completely independent instances in separate data center regions.
+      - Double write to both
+    - When region fails, try the other, until the failed region is back up for 26 hours.
+      - You only use the non-failed region because you'll miss data in the failed region unless it's up and healthy for 26 hours.
+    - Shards assigned via Paxos based system.
+      - Node failures reassign partitions
+      - During shard movement, write clients buffer their incoming data (1 minute of data per buffer, ring buffer, to sacrafice older data still buffered)
+        - One minute often sufficient. Extended outages would rather prioritize recent data.
+    - Shards added spin up by reading GlusterFS. 5 minute startup time for reading GlusterFS. About 16 GB on disk for each shard.
+      - Queues incoming data points while spinning up.
+    - If partial results received due to node spinning up, it'll retry in second region, and if that has partial data, a flag to the client is set.
+    - Automatic reforwarding of reads from unhealthy host to a healthy one means that users are protected from restarts and upgrades.
+    - And.... they apparently still have data in HDFS for reallly big disasters?
+** New Tools on Gorilla
+*** Correlation engine
+    - Calculates Pearson Product-Moment Correlation Coefficient which comparse a test time series to a large set of other time series.
+      - Interactive, brute-force search on many time series, limited to 1 million at a time.
+      - Helps automate root-cause analysis: "What happened around the time my service broke?"
+      - Satisfactory answers, and simpler to implement.
+    - To compute: test time series distributed to each gorilla host, along with all of the time series keys:
+      - Then, that host calculates top N correlated time series, ordered by abs value of PPMCC
+*** Charting
+    - Low-latency queries means more interactive charting
+*** Aggregations
+    - Went from map-reduce to running directly against gorilla. 
+** Experience
+*** Fault Tolerance (planned/unplanned events that have occurred)
+    - Network cuts: Automatically detected, shiftning reads to the unaffected coast without disruption
+    - Disaster readiness: fire drill, total network cut to one storage back end. Switched reads to unaffected coast.
+      - They manually pulled in logs from time frame to restore affected coast and get back to normal
+    - Config changes and code pushed: handled just fine
+    - Bug: Introduced, Gorilla shifted to other coast until bug was fixed and deployed. Minimal correctness issues in served data
+    - Single node failures: handled like a champ
+*** Lessons Learned
+    - Prioritize recent data over historic data.
+    - Read latency matters. 
+    - High availability trumps resource efficiency.
+    
+
+       

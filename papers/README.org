@@ -4,7 +4,6 @@
 * TODO [[https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/Specifying-Concurrent-Systems-with-TLA.pdf][Specifying Concurrent Systems with TLA+]]            :tla:specification:
 * TODO [[http://web2.research.att.com/export/sites/att_labs/people/Zave_Pamela/custom/chord-ccr.pdf][Using Lightweight Modeling to Understand Chord]] :formal:allow:chord:distsys:
 * TODO [[https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/bosu2015useful.pdf][Characteristics of Useful Code Reviews: An Empirical Study at Microsoft]] :dev:
-* TODO [[http://www.vldb.org/pvldb/vol8/p1816-teller.pdf][Gorilla: A Fast, Scalable, In-Memory Time Series Database]] :timeseries:
 * TODO [[http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.29.4871&rep=rep1&type=pdf][Synthesis: An Efficient Implementation of Fundamental Operating System Services (1992)]] :os:
 * TODO [[http://www.cs.tufts.edu/~nr/cs257/archive/luca-cardelli/functional-abstract-machine.pdf][Functional Abstract Machine]]                         :langs:functional:
 * TODO [[https://arxiv.org/abs/1702.01715][Software Engineering at Google]]                                   :dev:
@@ -14,6 +13,8 @@
 * TODO http://noisycode.com/blog/2015/02/28/cluster-reading-list/ :unorganized:
 * TODO An industrial Case: Pitfalls and Benefits of Applying Formal Methods to the Development of a Network Centric RTOS
 
+* DONE [[./gorilla.org][Gorilla: A Fast, Scalable, In-Memory Time Series Database]] :timeseries:
+  CLOSED: [2017-08-28 Mon 17:07]
 * DONE [[./realtime-data-processing-at-facebook.org][Realtime Data Processing at Facebook]] :distsys:streamping:realtime:data:
 * DONE [[./use-of-formal-methods-at-aws.org][Use for Formal Methods at AWS]]                                 :formal:
   CLOSED: [2017-03-28 Tue 00:28]
