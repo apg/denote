@@ -1,0 +1,57 @@
+#+TITLE: Making Property Based Testing Easier to Read
+
+Source: http://www.cai.sk/ojs/index.php/cai/article/viewFile/3381/781, [[./files/making-property-based-testing-easier-to-read.pdf][pdf]]
+Laura M. Castro, Pablo Lamela, Simon Thompson
+
+* Introduction
+  - Despite declarative style, PBT is not readable by everyone
+  - Agile suggests that all stakeholders in lifecycle is a key to success (e.g. allowing customers to write specifications)
+  - readSpec (subject of this paper) adopts Cucumber style to describe tests.
+  - For stateful models, they've developed their own readable semi-natural language representation.
+  - contributions:
+    - A way to close the comms gap between stakeholders with regard to PBT
+    - Use of Gherkin for PBT
+    - text based format to express pre, post, and results involved in tests derived from stateful PBT models.
+
+* Generating BDD Scenarios from QuickCheck Properties
+  - Involving users and clients in SDLC has lead to UML and/or STEPS
+  - In cucumber, specs are written as acceptance tests in feature files.
+    - Each feature can be describe using a number of scenarios.
+    - Scenarios are transformed into executable test cases by the implementation 
+      of sequences of steps.
+
+  #+begin_src
+  FEATURE: <name of feature>
+    In order to <general desc of the feature>
+    I need to <goal of the feature>
+  #+end_src
+
+  - "Feature headers" simply provide context to the scenarios.
+  
+  #+begin_src
+  SCENARIO: <desc of scenario>
+    GIVEN: <desc of input>
+     (AND <desc of additional input>)
+     WHEN: <desc of action>
+     (AND <desc of additional action>)
+     THEN: <desc of consequence of action>
+     (AND <desc of additional consequence of action>)
+  #+end_src
+
+  - Understandable and assessable by users and clients. 
+  - Has clear procedural style, identified as a test scenario.
+  - Cucumber can automatically translate into test cases.
+
+  - Intention of paper is to *not* follow BDD life cycle. 
+    - Instead take quickcehck properties and models as input sources.
+  
+  - Using QuickCheck eqc_suite to create a subsection of QC features that allows to generate a reduced set of test cases fulfilling some criteria (code coverage being one)
+    - Cover-compile the module to test, to enable the collection of coverage measures
+    - Generate a reduced but representative set of test inputs using QC eqc_suite:coverage_based/2 and eqc_suite:/cases/1
+    - Ensures a better distribution for their purposes.
+  - Using EDOC for purposes of specifiying the *feature* header.
+
+* Evaluation
+  - 1. there were some people that still would not make sense of either of the two alternatives (code, versus the text version)
+    2. the rest of interviewees consistently agreed that the text version was more helpful.
+

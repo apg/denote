@@ -14,6 +14,8 @@
 * TODO http://noisycode.com/blog/2015/02/28/cluster-reading-list/ :unorganized:
 * TODO An industrial Case: Pitfalls and Benefits of Applying Formal Methods to the Development of a Network Centric RTOS
 
+* DONE [[making-property-based-testing-easier-to-read.org][Making Property-Based Testing Easier to Read for Humans]]      :testing:
+  CLOSED: [2017-11-21 Tue 15:57]
 * DONE [[./gorilla.org][Gorilla: A Fast, Scalable, In-Memory Time Series Database]] :timeseries:
   CLOSED: [2017-08-28 Mon 17:07]
 * DONE [[./realtime-data-processing-at-facebook.org][Realtime Data Processing at Facebook]] :distsys:streaming:realtime:data:
