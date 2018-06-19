@@ -1,0 +1,46 @@
+#+TITLE: Talks to watch
+
+* DONE Cultivating Collaboration: Don't be So Defensive! (Jim Tamm)    :tedx:
+  CLOSED: [2018-06-19 Tue 13:26]
+  - https://www.youtube.com/watch?v=vjSTNv4gyMM
+  - Chickens are interesting collaborators
+  - Often: Star performers become star performers by suppressing others (in chickens, which applies to people as well)
+  - Red Zone vs Green Zone attitude:
+    - Green Zone were healthy and productive chickens
+    - Red Zone chickens murdered each other. More than half.
+    - Egg production in greenzone +260%
+  - Greenzone: Highly collaborative, blameless, less competition.
+  - Can't compete externally, if you don't collaborate internally.
+  - Biggest learning from CA teachers / labor unions studies
+    - Nothing will help you become more productive and collaborative than: 
+      - Managing your own defensiveness
+        - It increases your ability to solve problems.
+    - Green -> Red Zone is easy to move to based on small things (like crumbled up piece of paper)
+  - Premise:
+    Defensiveness does not protect us from other people.
+    It defends us from fears we don't want to feel.
+    - Potentially: Significance, competence, likeability
+  - Defensiveness helps us hide our fears from ourselves.
+  - Start paying attention to the outward behavior, as it's easier to
+    identify and become an early warning system.
+  - TODO: What makes _me_ feel defensive?
+  - Signs of defensiveness: 
+    - Withdrawal into deadly silence
+    - Playing poor me
+    - All or nothing thinking
+    - Wanting to be right
+    - Blaming or shaming others
+    - Sudden drop in IQ/confusion
+    - High charge of energy in the body
+    - Catastrophizing everything
+    - Wanting the last word
+    - Obsessive thinking
+    - Flooding with information to prove a point.
+  - Create an early warning system
+  - Then:
+    - Acknowledge the defensiveness
+    - Slow down the phisiology (take a walk, breathe)
+    - Check negative self-talk (make it positive)
+    - Create an ACTION STEP (e.g. be quiet for 15 seconds, instead of information flooding)
+    - Start over.
+
